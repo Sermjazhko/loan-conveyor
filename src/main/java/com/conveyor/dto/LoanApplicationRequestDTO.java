@@ -5,7 +5,6 @@ import java.time.LocalDate;
 
 import javax.validation.constraints.*;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -37,7 +36,6 @@ public class LoanApplicationRequestDTO {
     @Email(message = "Email address has invalid format: ${validatedValue}",
             regexp = "^[A-Za-z0-9+_.-]+@(.+)$")
     private String email;
-    @NotNull
     private LocalDate birthdate;
     @NotNull
     @Size(min = 4, max = 4)

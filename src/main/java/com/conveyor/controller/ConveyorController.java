@@ -10,7 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -24,19 +23,20 @@ public class ConveyorController {
     }
 
     @PostMapping("/offers")
-    public ResponseEntity<List<LoanOfferDTO>> saveBuyer(@RequestBody LoanApplicationRequestDTO loanApplicationRequestDTO){
+    public ResponseEntity<List<LoanOfferDTO>> getPostOffer(@RequestBody LoanApplicationRequestDTO loanApplicationRequestDTO){
         try {
             DataValidation.checkLoanApplicationRequestDTO(loanApplicationRequestDTO);
-            List<LoanOfferDTO> loanOfferDTOS = new ArrayList<>();
+            List<LoanOfferDTO> loanOfferDTOS;
             loanOfferDTOS = conveyorService.getOffers(loanApplicationRequestDTO);
             return new ResponseEntity<>(loanOfferDTOS, HttpStatus.CREATED);
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @PostMapping("/calculation")
-    public ResponseEntity<CreditDTO> saveBuyer(@RequestBody ScoringDataDTO scoringDataDTO){
+    public ResponseEntity<CreditDTO> getPostCalculation(@RequestBody ScoringDataDTO scoringDataDTO){
        /* try {
             return new ResponseEntity<>(, HttpStatus.CREATED);
         } catch (Exception e) {

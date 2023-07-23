@@ -13,7 +13,6 @@ import java.util.Set;
 public class DataValidation {
 
     public static boolean checkDate(LocalDate localDate) {
-
         if (localDate == null) {
             throw new NullPointerException("Date must not be null");
         }

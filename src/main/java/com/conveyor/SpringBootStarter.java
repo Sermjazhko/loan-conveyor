@@ -15,6 +15,5 @@ public class SpringBootStarter {
         SpringApplication.run(SpringBootStarter.class, args);
         //LoanApplicationRequestDTO loanApplicationRequestDTO = new LoanApplicationRequestDTO();
         //System.out.println("hello");
-
     }
 }
