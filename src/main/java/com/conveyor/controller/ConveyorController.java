@@ -4,11 +4,11 @@ import com.conveyor.dto.CreditDTO;
 import com.conveyor.dto.LoanApplicationRequestDTO;
 import com.conveyor.dto.LoanOfferDTO;
 import com.conveyor.dto.ScoringDataDTO;
+import com.conveyor.service.ConveyorService;
+import com.conveyor.validation.DataValidation;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -16,20 +16,35 @@ import java.util.List;
 @RequestMapping("/conveyor")
 public class ConveyorController {
 
-    @PostMapping("/offers")
-    public ResponseEntity<List<LoanOfferDTO>> saveBuyer(@RequestBody LoanApplicationRequestDTO loanApplicationRequestDTO){
-       /* try {
-            return new ResponseEntity<>(buyerRepository.save(buyer), HttpStatus.CREATED);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }*/
-        return null;
+    private final ConveyorService conveyorService;
+
+    public ConveyorController(ConveyorService conveyorService) {
+        this.conveyorService = conveyorService;
     }
 
+    @PostMapping("/offers")
+    public ResponseEntity<List<LoanOfferDTO>> getPostOffer(@RequestBody LoanApplicationRequestDTO
+                                                                       loanApplicationRequestDTO) {
+
+        try {
+            DataValidation.checkLoanApplicationRequestDTO(loanApplicationRequestDTO);
+            List<LoanOfferDTO> loanOfferDTOS;
+            loanOfferDTOS = conveyorService.getOffers(loanApplicationRequestDTO);
+
+            return new ResponseEntity<>(loanOfferDTOS, HttpStatus.CREATED);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    //так как был уже прескоринг и тут указан только скоринг,
+    // считаем, что имена и прочее верно передаются
     @PostMapping("/calculation")
-    public ResponseEntity<CreditDTO> saveBuyer(@RequestBody ScoringDataDTO scoringDataDTO){
+    public ResponseEntity<CreditDTO> getPostCalculation(@RequestBody ScoringDataDTO scoringDataDTO) {
        /* try {
-            return new ResponseEntity<>(buyerRepository.save(buyer), HttpStatus.CREATED);
+            return new ResponseEntity<>(, HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }*/
