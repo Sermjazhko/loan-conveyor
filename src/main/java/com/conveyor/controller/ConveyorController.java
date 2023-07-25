@@ -23,20 +23,26 @@ public class ConveyorController {
     }
 
     @PostMapping("/offers")
-    public ResponseEntity<List<LoanOfferDTO>> getPostOffer(@RequestBody LoanApplicationRequestDTO loanApplicationRequestDTO){
+    public ResponseEntity<List<LoanOfferDTO>> getPostOffer(@RequestBody LoanApplicationRequestDTO
+                                                                       loanApplicationRequestDTO) {
+
         try {
             DataValidation.checkLoanApplicationRequestDTO(loanApplicationRequestDTO);
             List<LoanOfferDTO> loanOfferDTOS;
             loanOfferDTOS = conveyorService.getOffers(loanApplicationRequestDTO);
+
             return new ResponseEntity<>(loanOfferDTOS, HttpStatus.CREATED);
         } catch (Exception e) {
             System.out.println(e.getMessage());
+
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
+    //так как был уже прескоринг и тут указан только скоринг,
+    // считаем, что имена и прочее верно передаются
     @PostMapping("/calculation")
-    public ResponseEntity<CreditDTO> getPostCalculation(@RequestBody ScoringDataDTO scoringDataDTO){
+    public ResponseEntity<CreditDTO> getPostCalculation(@RequestBody ScoringDataDTO scoringDataDTO) {
        /* try {
             return new ResponseEntity<>(, HttpStatus.CREATED);
         } catch (Exception e) {

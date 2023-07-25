@@ -1,6 +1,8 @@
 package com.conveyor.validation;
 
 import com.conveyor.dto.LoanApplicationRequestDTO;
+import com.conveyor.dto.ScoringDataDTO;
+import com.conveyor.scoring.EmploymentStatus;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
@@ -42,5 +44,28 @@ public class DataValidation {
         } else {
             return true;
         }
+    }
+
+    public static boolean checkScoringDataDTO(ScoringDataDTO scoringDataDTO, Double insurance) {
+        //если страховки нет, передаем 0
+        if (scoringDataDTO.getEmployment().getEmploymentStatus() == EmploymentStatus.UNEMPLOYED) {
+            return false;
+        }
+        if ((scoringDataDTO.getEmployment().getWorkExperienceTotal() < 12) ||
+                (scoringDataDTO.getEmployment().getWorkExperienceCurrent() < 3)) {
+            return false;
+        }
+
+        Double diffCreditAndSalary = scoringDataDTO.getEmployment().getSalary().doubleValue() * 20
+                - scoringDataDTO.getAmount().doubleValue() - insurance;
+        if (diffCreditAndSalary < 0) {
+            return false;
+        }
+        LocalDate localDateNow = LocalDate.now();
+        long years = scoringDataDTO.getBirthdate().until(localDateNow, ChronoUnit.YEARS);
+        if (years < 20 || years > 60) {
+            return false;
+        }
+        return true;
     }
 }
