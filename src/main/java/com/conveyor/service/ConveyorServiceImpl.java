@@ -1,8 +1,7 @@
 package com.conveyor.service;
 
 import com.conveyor.dto.*;
-import com.conveyor.scoring.MaritalStatus;
-import com.conveyor.scoring.ScoringRulesRate;
+import com.conveyor.scoring.*;
 import com.conveyor.validation.DataValidation;
 import org.springframework.stereotype.Service;
 
@@ -162,11 +161,11 @@ public class ConveyorServiceImpl implements ConveyorService {
 
     private Double scoringRate(Double rate, ScoringDataDTO scoringDataDTO) {
 
-        rate += ScoringRulesRate.getEmploymentStatus(scoringDataDTO.getEmployment().getEmploymentStatus());
-        rate += ScoringRulesRate.getPosition(scoringDataDTO.getEmployment().getPosition());
-        rate += ScoringRulesRate.getMaritalStatus(scoringDataDTO.getMaritalStatus());
+        rate += ScoringRulesRate.getEmploymentStatus((EmploymentStatus) scoringDataDTO.getEmployment().getEmploymentStatus());
+        rate += ScoringRulesRate.getPosition((Position) scoringDataDTO.getEmployment().getPosition());
+        rate += ScoringRulesRate.getMaritalStatus((MaritalStatus) scoringDataDTO.getMaritalStatus());
         rate += ScoringRulesRate.getDependentAmount(scoringDataDTO.getDependentAmount());
-        rate += ScoringRulesRate.getGender(scoringDataDTO.getGender(), scoringDataDTO.getBirthdate());
+        rate += ScoringRulesRate.getGender((Gender) scoringDataDTO.getGender(), scoringDataDTO.getBirthdate());
         return rate;
     }
 }
