@@ -50,5 +50,6 @@ public class SpringBootStarter {
         ConveyorServiceImpl conveyorService = new ConveyorServiceImpl();
         CreditDTO creditDTO = conveyorService.getCalculation(scoringDataDTO);
         System.out.println(creditDTO.getPaymentSchedule());
+        System.out.println(creditDTO.getPsk());
     }
 }

@@ -90,7 +90,7 @@ public class ConveyorServiceImpl implements ConveyorService {
                     BigDecimal.valueOf(remainingDebt)));
             date = date.plusMonths(1);
             interestPayment = 0.01 * remainingDebt * term / 12;
-            debtPayment = remainingDebt - interestPayment;
+            debtPayment = monthlyPayment - interestPayment;
             remainingDebt = remainingDebt - monthlyPayment;
             System.out.println(i + " " + remainingDebt);
         }
