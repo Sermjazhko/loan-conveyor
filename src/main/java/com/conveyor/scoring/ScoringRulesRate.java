@@ -9,6 +9,7 @@ import static com.conveyor.scoring.MaritalStatus.MARRIED;
 import static com.conveyor.scoring.MaritalStatus.NOT_MARRIED;
 import static com.conveyor.scoring.Position.*;
 
+//TODO <T extends Enum<T>> попробовать потом
 public class ScoringRulesRate {
     public static Double getEmploymentStatus(Enum employmentStatus) {
         Double rate;
@@ -60,11 +61,11 @@ public class ScoringRulesRate {
         LocalDate localDateNow = LocalDate.now();
         long years = localDate.until(localDateNow, ChronoUnit.YEARS);
         Double rate = 0.0;
-        if (gender.equals(WOMEN)) {
+        if (gender.equals(WOMAN)) {
             if (34 < years && years < 61) {
                 rate = -3.0;
             }
-        } else if (gender.equals(MEN)) {
+        } else if (gender.equals(MAN)) {
             if (29 < years && years < 56) {
                 rate = -3.0;
             }

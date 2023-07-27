@@ -25,7 +25,6 @@ public class ConveyorController {
     @PostMapping("/offers")
     public ResponseEntity<List<LoanOfferDTO>> getPostOffer(@RequestBody LoanApplicationRequestDTO
                                                                        loanApplicationRequestDTO) {
-
         try {
             DataValidation.checkLoanApplicationRequestDTO(loanApplicationRequestDTO);
             List<LoanOfferDTO> loanOfferDTOS;
@@ -43,11 +42,12 @@ public class ConveyorController {
     // считаем, что имена и прочее верно передаются
     @PostMapping("/calculation")
     public ResponseEntity<CreditDTO> getPostCalculation(@RequestBody ScoringDataDTO scoringDataDTO) {
-       /* try {
-            return new ResponseEntity<>(, HttpStatus.CREATED);
+        try {
+            CreditDTO creditDTO;
+            creditDTO = conveyorService.getCalculation(scoringDataDTO);
+            return new ResponseEntity<>(creditDTO, HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }*/
-        return null;
+        }
     }
 }

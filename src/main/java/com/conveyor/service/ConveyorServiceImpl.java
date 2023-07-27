@@ -1,9 +1,6 @@
 package com.conveyor.service;
 
-import com.conveyor.dto.CreditDTO;
-import com.conveyor.dto.LoanApplicationRequestDTO;
-import com.conveyor.dto.LoanOfferDTO;
-import com.conveyor.dto.ScoringDataDTO;
+import com.conveyor.dto.*;
 import com.conveyor.scoring.MaritalStatus;
 import com.conveyor.scoring.ScoringRulesRate;
 import com.conveyor.validation.DataValidation;
@@ -12,6 +9,7 @@ import org.springframework.stereotype.Service;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -62,6 +60,7 @@ public class ConveyorServiceImpl implements ConveyorService {
         Double insurance = getBaseRateAndInsurance().get(1);
         Double requestedAmount = scoringDataDTO.getAmount().doubleValue();
 
+
         if (scoringDataDTO.getIsInsuranceEnabled()) {
             requestedAmount += insurance;
             insurance = 0.0;
@@ -72,27 +71,44 @@ public class ConveyorServiceImpl implements ConveyorService {
 
         Double rateNew = rateChange(baseRate, scoringDataDTO.getIsInsuranceEnabled(),
                 scoringDataDTO.getIsSalaryClient());
+        System.out.println("rate= " + rateNew);
         Double rate = scoringRate(rateNew, scoringDataDTO);
-
-
-        //TODO пск
-
+        System.out.println("rate= " + rate);
         Double monthlyPayment = getAnnuityPayment(rate, requestedAmount, scoringDataDTO.getTerm());
+        //TODO тоже вынести отдельно
+        //упрощенная версия пск, ибо зачем сложная
+        Integer term = scoringDataDTO.getTerm();
+        Double psk = 1200 * ((term * monthlyPayment) / requestedAmount - 1) / term;
 
-        return null;
+        List<PaymentScheduleElement> paymentScheduleElements = new ArrayList<>();
+        LocalDate date = LocalDate.now();
+        Double interestPayment = 0.0, debtPayment = 0.0, remainingDebt = monthlyPayment * term;
+        //TODO вынести в отдельную хуету
+        for (Integer i = 0; i < term; ++i) {
+            paymentScheduleElements.add(new PaymentScheduleElement(i, date, BigDecimal.valueOf(monthlyPayment),
+                    BigDecimal.valueOf(interestPayment), BigDecimal.valueOf(debtPayment),
+                    BigDecimal.valueOf(remainingDebt)));
+            date = date.plusMonths(1);
+            interestPayment = 0.01 * remainingDebt * term / 12;
+            debtPayment = remainingDebt - interestPayment;
+            remainingDebt = remainingDebt - monthlyPayment;
+            System.out.println(i + " " + remainingDebt);
+        }
+        CreditDTO creditDTO = new CreditDTO(BigDecimal.valueOf(requestedAmount), term,
+                BigDecimal.valueOf(monthlyPayment), BigDecimal.valueOf(rate), BigDecimal.valueOf(psk),
+                scoringDataDTO.getIsInsuranceEnabled(), scoringDataDTO.getIsSalaryClient(), paymentScheduleElements);
+        return creditDTO;
     }
 
     private Double rateChange(Double rate, Boolean isInsuranceEnabled, Boolean isSalaryClient) {
 
         Double rateNew = rate;
-
         if (isInsuranceEnabled) {
             rateNew -= 3;
         }
         if (isSalaryClient) {
             rateNew -= 1;
         }
-
         return rateNew;
     }
 

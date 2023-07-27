@@ -18,4 +18,16 @@ public class PaymentScheduleElement {
     private BigDecimal interestPayment;
     private BigDecimal debtPayment;
     private BigDecimal remainingDebt;
+
+    @Override
+    public String toString() {
+        return "PaymentScheduleElement{" +
+                "number= " + number +
+                ", date= " + date +
+                ", totalPayment= " + totalPayment +
+                ", interestPayment= " + interestPayment +
+                ", debtPayment= " + debtPayment +
+                ", remainingDebt= " + remainingDebt + "\n" +
+                '}';
+    }
 }

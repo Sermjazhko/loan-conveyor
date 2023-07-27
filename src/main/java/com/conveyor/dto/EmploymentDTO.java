@@ -18,4 +18,16 @@ public class EmploymentDTO {
     private Enum position;
     private Integer workExperienceTotal;
     private Integer workExperienceCurrent;
+
+    @Override
+    public String toString() {
+        return "EmploymentDTO{" +
+                "employmentStatus=" + employmentStatus +
+                ", employerINN='" + employerINN + '\'' +
+                ", salary=" + salary +
+                ", position=" + position +
+                ", workExperienceTotal=" + workExperienceTotal +
+                ", workExperienceCurrent=" + workExperienceCurrent +
+                '}';
+    }
 }
