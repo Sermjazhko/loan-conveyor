@@ -5,167 +5,151 @@ import com.conveyor.scoring.*;
 import com.conveyor.validation.DataValidation;
 import org.springframework.stereotype.Service;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
+import java.util.logging.Logger;
 
 import static java.lang.Math.*;
 
 @Service
 public class ConveyorServiceImpl implements ConveyorService {
 
+    private static Logger log = Logger.getLogger(ConveyorServiceImpl.class.getName());
+
+    private final ScoringService service;
+
+    public ConveyorServiceImpl(ScoringService service) {
+        this.service = service;
+    }
+
+
     @Override
     public List<LoanOfferDTO> getOffers(LoanApplicationRequestDTO loanApplicationRequestDTO)
             throws IOException {
 
-        List<LoanOfferDTO> loanOfferDTOS = new ArrayList<>();
+        return List.of(
+                createOffer(false, false, loanApplicationRequestDTO),
+                createOffer(false, true, loanApplicationRequestDTO),
+                createOffer(true, false, loanApplicationRequestDTO),
+                createOffer(true, true, loanApplicationRequestDTO)
+        );
+    }
 
-        /*  try {*/
-        Double baseRate = getBaseRateAndInsurance().get(0);
-        Double insurance = getBaseRateAndInsurance().get(1);
+    private LoanOfferDTO createOffer(Boolean isInsuranceEnabled, Boolean isSalaryClient,
+                                     LoanApplicationRequestDTO loanApplicationRequestDTO) throws IOException {
 
+        BigDecimal totalAmount = service.totalAmountByServices(loanApplicationRequestDTO.getAmount(),
+                isInsuranceEnabled);
+
+        log.info("Total amount = " + totalAmount);
+        BigDecimal rate = service.calculateRate(isInsuranceEnabled, isSalaryClient);
+
+        log.info("New rate = " + rate);
         Long id = 0L; //чисто в теории, наверное, id может потом из бд быть известно,
         // сейчас немного непонятно, как формируется, поэтому очень нубно
 
-        Boolean isInsuranceEnabled = false, isSalaryClient = false;
-        Double newRate;
-        for (int i = 0; i < 3; i++) {
-            newRate = rateChange(baseRate, isInsuranceEnabled, isSalaryClient);
+        LoanOfferDTO loanOfferDTO = new LoanOfferDTO(
+                id,
+                loanApplicationRequestDTO.getAmount(),
+                totalAmount,
+                loanApplicationRequestDTO.getTerm(),
+                getAnnuityPayment(rate, totalAmount, loanApplicationRequestDTO.getTerm()),
+                rate,
+                isInsuranceEnabled,
+                isSalaryClient);
 
-            loanOfferDTOS.add(createOffer(newRate, loanApplicationRequestDTO.getAmount(),
-                    loanApplicationRequestDTO.getTerm(), id, isInsuranceEnabled, isSalaryClient, insurance));
-            id += 1;
-            isInsuranceEnabled = isSalaryClient;
-            isSalaryClient = !isSalaryClient;
-        }
-        newRate = rateChange(baseRate, true, true);
+        return loanOfferDTO;
 
-        loanOfferDTOS.add(createOffer(newRate, loanApplicationRequestDTO.getAmount(),
-                loanApplicationRequestDTO.getTerm(), id, true, true, insurance));
-        /*} catch (IOException e) {
-            throw new IOException("File not found or request for file is invalid");
-        }*/
-        return loanOfferDTOS;
     }
 
     @Override
     public CreditDTO getCalculation(ScoringDataDTO scoringDataDTO) throws IOException {
 
-        Double baseRate = getBaseRateAndInsurance().get(0);
-        Double insurance = getBaseRateAndInsurance().get(1);
-        Double requestedAmount = scoringDataDTO.getAmount().doubleValue();
-
+        //скоринг данных
+        BigDecimal insurance = service.getBaseRateAndInsurance().get(1);
+        BigDecimal requestedAmount = scoringDataDTO.getAmount();
+        log.info("Insurance = " + insurance);
 
         if (scoringDataDTO.getIsInsuranceEnabled()) {
-            requestedAmount += insurance;
-            insurance = 0.0;
+            requestedAmount = requestedAmount.add(insurance);
         }
+
         if (!DataValidation.checkScoringDataDTO(scoringDataDTO, insurance)) {
             throw new IllegalArgumentException("Unsuitable candidate");
         }
 
-        Double rateNew = rateChange(baseRate, scoringDataDTO.getIsInsuranceEnabled(),
-                scoringDataDTO.getIsSalaryClient());
-        System.out.println("rate= " + rateNew);
-        Double rate = scoringRate(rateNew, scoringDataDTO);
-        System.out.println("rate= " + rate);
-        Double monthlyPayment = getAnnuityPayment(rate, requestedAmount, scoringDataDTO.getTerm());
-        //TODO тоже вынести отдельно
-        //упрощенная версия пск, ибо зачем сложная
+        //высчитывание ставки
+
+        BigDecimal rate = service.scoringRate(service.calculateRate(scoringDataDTO.getIsInsuranceEnabled(),
+                scoringDataDTO.getIsSalaryClient()), scoringDataDTO);
+
+        log.info("New rate = " + rate);
+
+        //подсчет пск, размер ежемесячного платежа
+        BigDecimal monthlyPayment = getAnnuityPayment(rate, requestedAmount, scoringDataDTO.getTerm());
+
+        log.info("Monthly payment = " + monthlyPayment);
         Integer term = scoringDataDTO.getTerm();
-        Double psk = 1200 * ((term * monthlyPayment) / requestedAmount - 1) / term;
+        BigDecimal psk = getPSK(scoringDataDTO, monthlyPayment, requestedAmount);
+
+        log.info("psk = " + psk);
+
+        // график ежемесячных платежей
+        List<PaymentScheduleElement> paymentScheduleElements = createListPayment(monthlyPayment, scoringDataDTO);
+
+        return new CreditDTO(requestedAmount,
+                term,
+                monthlyPayment,
+                rate,
+                psk,
+                scoringDataDTO.getIsInsuranceEnabled(),
+                scoringDataDTO.getIsSalaryClient(),
+                paymentScheduleElements);
+    }
+
+    private BigDecimal getAnnuityPayment(BigDecimal rate, BigDecimal requestedAmount, Integer term) {
+
+        Double interestRate = rate.doubleValue() * 0.01 / 12;
+        Double result = requestedAmount.doubleValue() * (interestRate + interestRate / (pow(1 + interestRate, term) - 1));
+
+        return BigDecimal.valueOf(result);
+    }
+
+    private BigDecimal getPSK(ScoringDataDTO scoringDataDTO, BigDecimal monthlyPayment, BigDecimal requestedAmount) {
+
+        //упрощенная версия пск
+        Integer term = scoringDataDTO.getTerm();
+        Double psk = 1200 * ((term.doubleValue() * monthlyPayment.doubleValue()) /
+                requestedAmount.doubleValue() - 1) / term;
+
+        return BigDecimal.valueOf(psk);
+    }
+
+    private List<PaymentScheduleElement> createListPayment(BigDecimal monthlyPayment, ScoringDataDTO scoringDataDTO) {
 
         List<PaymentScheduleElement> paymentScheduleElements = new ArrayList<>();
+
         LocalDate date = LocalDate.now();
-        Double interestPayment = 0.0, debtPayment = 0.0, remainingDebt = monthlyPayment * term;
-        //TODO вынести в отдельную хуету
+        Integer term = scoringDataDTO.getTerm();
+        Double monthlyPaymentDoub = monthlyPayment.doubleValue();
+
+        Double interestPayment = 0.0, debtPayment = 0.0, remainingDebt = monthlyPaymentDoub * term;
+
         for (Integer i = 0; i < term; ++i) {
-            paymentScheduleElements.add(new PaymentScheduleElement(i, date, BigDecimal.valueOf(monthlyPayment),
+            paymentScheduleElements.add(new PaymentScheduleElement(i, date, monthlyPayment,
                     BigDecimal.valueOf(interestPayment), BigDecimal.valueOf(debtPayment),
                     BigDecimal.valueOf(remainingDebt)));
+            //изменяем инфу
             date = date.plusMonths(1);
             interestPayment = 0.01 * remainingDebt * term / 12;
-            debtPayment = monthlyPayment - interestPayment;
-            remainingDebt = remainingDebt - monthlyPayment;
-            System.out.println(i + " " + remainingDebt);
-        }
-        CreditDTO creditDTO = new CreditDTO(BigDecimal.valueOf(requestedAmount), term,
-                BigDecimal.valueOf(monthlyPayment), BigDecimal.valueOf(rate), BigDecimal.valueOf(psk),
-                scoringDataDTO.getIsInsuranceEnabled(), scoringDataDTO.getIsSalaryClient(), paymentScheduleElements);
-        return creditDTO;
-    }
-
-    private Double rateChange(Double rate, Boolean isInsuranceEnabled, Boolean isSalaryClient) {
-
-        Double rateNew = rate;
-        if (isInsuranceEnabled) {
-            rateNew -= 3;
-        }
-        if (isSalaryClient) {
-            rateNew -= 1;
-        }
-        return rateNew;
-    }
-
-    private LoanOfferDTO createOffer(Double rate, BigDecimal amount, Integer term, Long id,
-                                     Boolean isInsuranceEnabled, Boolean isSalaryClient,
-                                     Double insurance) {
-
-        Double requestedAmount = amount.doubleValue();
-
-        if (isInsuranceEnabled) {
-            requestedAmount += insurance;
+            debtPayment = monthlyPaymentDoub - interestPayment;
+            remainingDebt = remainingDebt - monthlyPaymentDoub;
         }
 
-        Double annuityPayment = getAnnuityPayment(rate, requestedAmount, term);
-        BigDecimal monthlyPayment = BigDecimal.valueOf(Math.round(annuityPayment));
-        BigDecimal totalAmount = BigDecimal.valueOf(Math.round(requestedAmount));
-
-        LoanOfferDTO loanOfferDTO = new LoanOfferDTO(id, BigDecimal.valueOf(requestedAmount),
-                totalAmount, term, monthlyPayment, BigDecimal.valueOf(rate),
-                isInsuranceEnabled, isSalaryClient);
-
-        return loanOfferDTO;
+        return paymentScheduleElements;
     }
 
-    private Double getAnnuityPayment(Double rate, Double requestedAmount, Integer term) {
-
-        Double interestRate = rate * 0.01 / 12;
-        return requestedAmount * (interestRate + interestRate / (pow(1 + interestRate, term) - 1));
-    }
-
-    public List<Double> getBaseRateAndInsurance() throws IOException {
-        //0 - base rate, 1 - insurance
-        FileInputStream file;
-        Properties properties = new Properties();
-        try {
-            file = new FileInputStream("src/main/resources/config.properties");
-            properties.load(file);
-            Double baseRate = Double.parseDouble(properties.getProperty("base.rate"));
-            Double insurance = Double.parseDouble(properties.getProperty("insurance"));
-            file.close();
-            return new ArrayList<Double>() {
-                {
-                    add(baseRate);
-                    add(insurance);
-                }
-            };
-        } catch (IOException e) {
-            throw new IOException("File not found or request for file is invalid");
-        }
-    }
-
-    private Double scoringRate(Double rate, ScoringDataDTO scoringDataDTO) {
-
-        rate += ScoringRulesRate.getEmploymentStatus((EmploymentStatus) scoringDataDTO.getEmployment().getEmploymentStatus());
-        rate += ScoringRulesRate.getPosition((Position) scoringDataDTO.getEmployment().getPosition());
-        rate += ScoringRulesRate.getMaritalStatus((MaritalStatus) scoringDataDTO.getMaritalStatus());
-        rate += ScoringRulesRate.getDependentAmount(scoringDataDTO.getDependentAmount());
-        rate += ScoringRulesRate.getGender((Gender) scoringDataDTO.getGender(), scoringDataDTO.getBirthdate());
-        return rate;
-    }
 }

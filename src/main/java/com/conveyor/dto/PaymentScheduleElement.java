@@ -21,13 +21,13 @@ public class PaymentScheduleElement {
 
     @Override
     public String toString() {
-        return "PaymentScheduleElement{" +
+        return "\nPaymentScheduleElement{" +
                 "number= " + number +
                 ", date= " + date +
                 ", totalPayment= " + totalPayment +
                 ", interestPayment= " + interestPayment +
                 ", debtPayment= " + debtPayment +
-                ", remainingDebt= " + remainingDebt + "\n" +
+                ", remainingDebt= " + remainingDebt +
                 '}';
     }
 }

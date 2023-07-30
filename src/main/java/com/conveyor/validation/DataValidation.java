@@ -8,6 +8,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Set;
@@ -46,21 +47,23 @@ public class DataValidation {
         }
     }
 
-    public static boolean checkScoringDataDTO(ScoringDataDTO scoringDataDTO, Double insurance) {
+    public static boolean checkScoringDataDTO(ScoringDataDTO scoringDataDTO, BigDecimal insurance) {
         //если страховки нет, передаем 0
         if (scoringDataDTO.getEmployment().getEmploymentStatus() == EmploymentStatus.UNEMPLOYED) {
             return false;
         }
+
         if ((scoringDataDTO.getEmployment().getWorkExperienceTotal() < 12) ||
                 (scoringDataDTO.getEmployment().getWorkExperienceCurrent() < 3)) {
             return false;
         }
 
         Double diffCreditAndSalary = scoringDataDTO.getEmployment().getSalary().doubleValue() * 20
-                - scoringDataDTO.getAmount().doubleValue() - insurance;
+                - scoringDataDTO.getAmount().doubleValue() - insurance.doubleValue();
         if (diffCreditAndSalary < 0) {
             return false;
         }
+
         LocalDate localDateNow = LocalDate.now();
         long years = scoringDataDTO.getBirthdate().until(localDateNow, ChronoUnit.YEARS);
         if (years < 20 || years > 60) {

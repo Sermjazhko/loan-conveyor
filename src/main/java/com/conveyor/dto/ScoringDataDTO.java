@@ -30,4 +30,27 @@ public class ScoringDataDTO {
     private String account;
     private Boolean isInsuranceEnabled;
     private Boolean isSalaryClient;
+
+    @Override
+    public String toString() {
+        return "\nScoringDataDTO{" +
+                "amount= " + amount +
+                ", term= " + term +
+                ", firstName= '" + firstName + '\'' +
+                ", lastName= '" + lastName + '\'' +
+                ", middleName= '" + middleName + '\'' +
+                ", gender= " + gender +
+                ", birthdate= " + birthdate +
+                ", passportSeries= '" + passportSeries + '\'' +
+                ", passportNumber= '" + passportNumber + '\'' +
+                ", passportIssueDate= " + passportIssueDate +
+                ", passportIssueBranch= '" + passportIssueBranch + '\'' +
+                ", maritalStatus= " + maritalStatus +
+                ", dependentAmount= " + dependentAmount +
+                ", employment= " + employment +
+                ", account= '" + account + '\'' +
+                ", isInsuranceEnabled= " + isInsuranceEnabled +
+                ", isSalaryClient= " + isSalaryClient +
+                '}';
+    }
 }

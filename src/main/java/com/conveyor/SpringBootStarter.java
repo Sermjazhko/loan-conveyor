@@ -2,7 +2,6 @@ package com.conveyor;
 
 import com.conveyor.dto.CreditDTO;
 import com.conveyor.dto.EmploymentDTO;
-import com.conveyor.dto.LoanApplicationRequestDTO;
 
 import com.conveyor.dto.ScoringDataDTO;
 import com.conveyor.scoring.EmploymentStatus;
@@ -10,7 +9,7 @@ import com.conveyor.scoring.Gender;
 import com.conveyor.scoring.MaritalStatus;
 import com.conveyor.scoring.Position;
 import com.conveyor.service.ConveyorServiceImpl;
-import com.conveyor.validation.DataValidation;
+import com.conveyor.service.ScoringService;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -18,14 +17,14 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-//@SpringBootApplication
+@SpringBootApplication
 public class SpringBootStarter {
 
     public static void main(String[] args) throws IOException {
-        //    SpringApplication.run(SpringBootStarter.class, args);
+        SpringApplication.run(SpringBootStarter.class, args);
         //LoanApplicationRequestDTO loanApplicationRequestDTO = new LoanApplicationRequestDTO();
         //System.out.println("hello");
-        ScoringDataDTO scoringDataDTO = new ScoringDataDTO();
+        /*ScoringDataDTO scoringDataDTO = new ScoringDataDTO();
         scoringDataDTO.setAccount("1234");
         scoringDataDTO.setBirthdate(LocalDate.of(2000, 12, 10));
         scoringDataDTO.setAmount(BigDecimal.valueOf(20000));
@@ -47,9 +46,10 @@ public class SpringBootStarter {
 
         System.out.println("hello");
         System.out.println(scoringDataDTO.getEmployment());
-        ConveyorServiceImpl conveyorService = new ConveyorServiceImpl();
+        ScoringService scoring = new ScoringService();
+        ConveyorServiceImpl conveyorService = new ConveyorServiceImpl(scoring);
         CreditDTO creditDTO = conveyorService.getCalculation(scoringDataDTO);
         System.out.println(creditDTO.getPaymentSchedule());
-        System.out.println(creditDTO.getPsk());
+        System.out.println(creditDTO.getPsk());*/
     }
 }
