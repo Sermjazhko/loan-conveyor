@@ -2,6 +2,8 @@ package com.conveyor.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,6 +13,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Information about the user for the formation of a loan")
 public class ScoringDataDTO {
 
     private BigDecimal amount;

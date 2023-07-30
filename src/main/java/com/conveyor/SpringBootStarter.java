@@ -1,9 +1,7 @@
 package com.conveyor;
 
-import com.conveyor.dto.CreditDTO;
-import com.conveyor.dto.EmploymentDTO;
+import com.conveyor.dto.*;
 
-import com.conveyor.dto.ScoringDataDTO;
 import com.conveyor.scoring.EmploymentStatus;
 import com.conveyor.scoring.Gender;
 import com.conveyor.scoring.MaritalStatus;
@@ -16,13 +14,13 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 @SpringBootApplication
 public class SpringBootStarter {
 
     public static void main(String[] args) throws IOException {
         SpringApplication.run(SpringBootStarter.class, args);
-        //LoanApplicationRequestDTO loanApplicationRequestDTO = new LoanApplicationRequestDTO();
         //System.out.println("hello");
         /*ScoringDataDTO scoringDataDTO = new ScoringDataDTO();
         scoringDataDTO.setAccount("1234");
@@ -51,5 +49,16 @@ public class SpringBootStarter {
         CreditDTO creditDTO = conveyorService.getCalculation(scoringDataDTO);
         System.out.println(creditDTO.getPaymentSchedule());
         System.out.println(creditDTO.getPsk());*/
+/*
+
+        LoanApplicationRequestDTO loanApplicationRequestDTO = new LoanApplicationRequestDTO();
+        loanApplicationRequestDTO.setAmount(BigDecimal.valueOf(500));
+        loanApplicationRequestDTO.setTerm(10);
+        ScoringService scoringService = new ScoringService();
+        ConveyorServiceImpl conveyorService = new ConveyorServiceImpl(scoringService);
+
+        List<LoanOfferDTO> offers = conveyorService.getOffers(loanApplicationRequestDTO);
+*/
+
     }
 }

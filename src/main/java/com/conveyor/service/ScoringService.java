@@ -1,5 +1,6 @@
 package com.conveyor.service;
 
+import com.conveyor.dto.PaymentScheduleElement;
 import com.conveyor.dto.ScoringDataDTO;
 import com.conveyor.scoring.EmploymentStatus;
 import com.conveyor.scoring.Gender;
@@ -16,6 +17,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Logger;
+
+import static java.lang.Math.pow;
 
 @Service
 public class ScoringService {
@@ -114,7 +117,6 @@ public class ScoringService {
     }
 
     public List<BigDecimal> getBaseRateAndInsurance() throws IOException {
-
         //0 - base rate, 1 - insurance
         FileInputStream file;
         Properties properties = new Properties();
@@ -174,6 +176,48 @@ public class ScoringService {
         rate = rate.add(getGender((Gender) scoringDataDTO.getGender(), scoringDataDTO.getBirthdate()));
 
         return rate;
+    }
+
+    public BigDecimal getAnnuityPayment(BigDecimal rate, BigDecimal requestedAmount, Integer term) {
+
+        Double interestRate = rate.doubleValue() * 0.01 / 12;
+        Double result = requestedAmount.doubleValue() * (interestRate + interestRate / (pow(1 + interestRate, term) - 1));
+
+        return BigDecimal.valueOf(result);
+    }
+
+    public BigDecimal getPSK(ScoringDataDTO scoringDataDTO, BigDecimal monthlyPayment, BigDecimal requestedAmount) {
+
+        //упрощенная версия пск
+        Integer term = scoringDataDTO.getTerm();
+        Double psk = 1200 * ((term.doubleValue() * monthlyPayment.doubleValue()) /
+                requestedAmount.doubleValue() - 1) / term;
+
+        return BigDecimal.valueOf(psk);
+    }
+
+    public List<PaymentScheduleElement> createListPayment(BigDecimal monthlyPayment, ScoringDataDTO scoringDataDTO) {
+
+        List<PaymentScheduleElement> paymentScheduleElements = new ArrayList<>();
+
+        LocalDate date = LocalDate.now();
+        Integer term = scoringDataDTO.getTerm();
+        Double monthlyPaymentDoub = monthlyPayment.doubleValue();
+
+        Double interestPayment = 0.0, debtPayment = 0.0, remainingDebt = monthlyPaymentDoub * term;
+
+        for (Integer i = 0; i < term; ++i) {
+            paymentScheduleElements.add(new PaymentScheduleElement(i, date, monthlyPayment,
+                    BigDecimal.valueOf(interestPayment), BigDecimal.valueOf(debtPayment),
+                    BigDecimal.valueOf(remainingDebt)));
+            //изменяем инфу
+            date = date.plusMonths(1);
+            interestPayment = 0.01 * remainingDebt * term / 12;
+            debtPayment = monthlyPaymentDoub - interestPayment;
+            remainingDebt = remainingDebt - monthlyPaymentDoub;
+        }
+
+        return paymentScheduleElements;
     }
 
 }
