@@ -2,5 +2,5 @@ package com.conveyor.scoring;
 
 public enum MaritalStatus {
     MARRIED,
-    NOT_MARRIED
+    NOT, NOT_MARRIED
 }

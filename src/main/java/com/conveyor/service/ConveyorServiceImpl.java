@@ -22,7 +22,6 @@ public class ConveyorServiceImpl implements ConveyorService {
         this.scoringService = service;
     }
 
-
     @Override
     public List<LoanOfferDTO> getOffers(LoanApplicationRequestDTO loanApplicationRequestDTO)
             throws IOException {
@@ -43,6 +42,8 @@ public class ConveyorServiceImpl implements ConveyorService {
 
         BigDecimal rate = scoringService.calculateRate(isInsuranceEnabled, isSalaryClient);
 
+        BigDecimal monthlyPayment = scoringService.getAnnuityPayment(rate, totalAmount, loanApplicationRequestDTO.getTerm());
+
         Long id = idApp++; //чисто в теории, наверное, id может потом из бд быть известно,
         // сейчас немного непонятно, как формируется, поэтому очень нубно
 
@@ -51,7 +52,7 @@ public class ConveyorServiceImpl implements ConveyorService {
                 loanApplicationRequestDTO.getAmount(),
                 totalAmount,
                 loanApplicationRequestDTO.getTerm(),
-                scoringService.getAnnuityPayment(rate, totalAmount, loanApplicationRequestDTO.getTerm()),
+                monthlyPayment,
                 rate,
                 isInsuranceEnabled,
                 isSalaryClient);
@@ -71,11 +72,11 @@ public class ConveyorServiceImpl implements ConveyorService {
 
         if (scoringDataDTO.getIsInsuranceEnabled()) {
             requestedAmount = requestedAmount.add(insurance);
+        } else {
+            insurance = new BigDecimal("0");
         }
 
-        if (!DataValidation.checkScoringDataDTO(scoringDataDTO, insurance)) {
-            throw new IllegalArgumentException("Unsuitable candidate");
-        }
+        scoringService.checkScoringDataDTO(scoringDataDTO, insurance);
 
         //высчитывание ставки
         BigDecimal rate = scoringService.scoringRate(scoringService.calculateRate(scoringDataDTO.getIsInsuranceEnabled(),
@@ -88,12 +89,13 @@ public class ConveyorServiceImpl implements ConveyorService {
 
         log.info("Monthly payment = " + monthlyPayment);
         Integer term = scoringDataDTO.getTerm();
-        BigDecimal psk = scoringService.getPSK(scoringDataDTO, monthlyPayment, requestedAmount);
+        BigDecimal psk = scoringService.getPSK(term, monthlyPayment, requestedAmount);
 
         log.info("psk = " + psk);
 
         // график ежемесячных платежей
-        List<PaymentScheduleElement> paymentScheduleElements = scoringService.createListPayment(monthlyPayment, scoringDataDTO);
+        List<PaymentScheduleElement> paymentScheduleElements =
+                scoringService.createListPayment(monthlyPayment, scoringDataDTO, rate);
 
         return new CreditDTO(requestedAmount,
                 term,
@@ -104,6 +106,4 @@ public class ConveyorServiceImpl implements ConveyorService {
                 scoringDataDTO.getIsSalaryClient(),
                 paymentScheduleElements);
     }
-
-
 }

@@ -1,6 +1,7 @@
 package com.conveyor.dto;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -34,5 +35,24 @@ public class EmploymentDTO {
                 ", workExperienceTotal=" + workExperienceTotal +
                 ", workExperienceCurrent=" + workExperienceCurrent +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        EmploymentDTO that = (EmploymentDTO) o;
+        return Objects.equals(employmentStatus, that.employmentStatus) &&
+                Objects.equals(employerINN, that.employerINN) &&
+                Objects.equals(salary, that.salary) &&
+                Objects.equals(position, that.position) &&
+                Objects.equals(workExperienceTotal, that.workExperienceTotal) &&
+                Objects.equals(workExperienceCurrent, that.workExperienceCurrent);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(employmentStatus, employerINN, salary,
+                position, workExperienceTotal, workExperienceCurrent);
     }
 }

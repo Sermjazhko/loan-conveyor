@@ -23,11 +23,12 @@ import static java.lang.Math.pow;
 @Service
 public class ScoringService {
     private static Logger log = Logger.getLogger(ScoringService.class.getName());
+
     public BigDecimal getEmploymentStatus(EmploymentStatus employmentStatus) {
 
         BigDecimal rate;
 
-        switch (employmentStatus){
+        switch (employmentStatus) {
             case SELF_EMPLOYED:
                 rate = BigDecimal.valueOf(1);
                 break;
@@ -45,7 +46,7 @@ public class ScoringService {
 
         BigDecimal rate;
 
-        switch (position){
+        switch (position) {
             case MANAGER:
                 rate = BigDecimal.valueOf(0);
                 break;
@@ -66,7 +67,7 @@ public class ScoringService {
 
         BigDecimal rate;
 
-        switch (maritalStatus){
+        switch (maritalStatus) {
             case MARRIED:
                 rate = BigDecimal.valueOf(-3);
                 break;
@@ -82,8 +83,9 @@ public class ScoringService {
 
     public BigDecimal getDependentAmount(Integer dependentAmount) {
 
-        BigDecimal rate = BigDecimal.valueOf(0);;
-        if(dependentAmount > 1) {
+        BigDecimal rate = BigDecimal.valueOf(0);
+
+        if (dependentAmount > 1) {
             rate = rate.add(BigDecimal.valueOf(1));
         }
         return rate;
@@ -93,9 +95,9 @@ public class ScoringService {
 
         LocalDate localDateNow = LocalDate.now();
         long years = localDate.until(localDateNow, ChronoUnit.YEARS);
-        BigDecimal rate = BigDecimal.valueOf(0);;
+        BigDecimal rate = BigDecimal.valueOf(0);
 
-        switch (gender){
+        switch (gender) {
             case WOMAN:
                 if (34 < years && years < 61) {
                     rate = BigDecimal.valueOf(-3);
@@ -110,7 +112,7 @@ public class ScoringService {
                 rate = BigDecimal.valueOf(3);
                 break;
             default:
-                throw new IllegalArgumentException("Not employment status");
+                throw new IllegalArgumentException("Not gender");
         }
 
         return rate;
@@ -120,7 +122,6 @@ public class ScoringService {
         //0 - base rate, 1 - insurance
         FileInputStream file;
         Properties properties = new Properties();
-
         try {
             file = new FileInputStream("src/main/resources/config.properties");
             properties.load(file);
@@ -144,7 +145,6 @@ public class ScoringService {
     public BigDecimal totalAmountByServices(BigDecimal amount, Boolean isInsuranceEnabled) throws IOException {
 
         BigDecimal insurance = getBaseRateAndInsurance().get(1);
-
         if (isInsuranceEnabled) {
             amount = amount.add(insurance);
         }
@@ -159,7 +159,6 @@ public class ScoringService {
         if (isInsuranceEnabled) {
             rate = rate.add(BigDecimal.valueOf(-3));
         }
-
         if (isSalaryClient) {
             rate = rate.add(BigDecimal.valueOf(-1));
         }
@@ -181,43 +180,81 @@ public class ScoringService {
     public BigDecimal getAnnuityPayment(BigDecimal rate, BigDecimal requestedAmount, Integer term) {
 
         Double interestRate = rate.doubleValue() * 0.01 / 12;
-        Double result = requestedAmount.doubleValue() * (interestRate + interestRate / (pow(1 + interestRate, term) - 1));
+        Double payment = requestedAmount.doubleValue() * (interestRate + interestRate / (pow(1 + interestRate, term) - 1));
 
-        return BigDecimal.valueOf(result);
+        BigDecimal result = BigDecimal.valueOf(payment).setScale(2, BigDecimal.ROUND_HALF_UP);
+
+        return result;
     }
 
-    public BigDecimal getPSK(ScoringDataDTO scoringDataDTO, BigDecimal monthlyPayment, BigDecimal requestedAmount) {
+    public BigDecimal getPSK(Integer term, BigDecimal monthlyPayment, BigDecimal requestedAmount) {
 
         //упрощенная версия пск
-        Integer term = scoringDataDTO.getTerm();
         Double psk = 1200 * ((term.doubleValue() * monthlyPayment.doubleValue()) /
                 requestedAmount.doubleValue() - 1) / term;
 
-        return BigDecimal.valueOf(psk);
+        BigDecimal result = BigDecimal.valueOf(psk).setScale(2, BigDecimal.ROUND_HALF_UP);
+
+        return result;
     }
 
-    public List<PaymentScheduleElement> createListPayment(BigDecimal monthlyPayment, ScoringDataDTO scoringDataDTO) {
+    public List<PaymentScheduleElement> createListPayment(BigDecimal monthlyPayment, ScoringDataDTO scoringDataDTO,
+                                                          BigDecimal rate) {
 
         List<PaymentScheduleElement> paymentScheduleElements = new ArrayList<>();
 
         LocalDate date = LocalDate.now();
         Integer term = scoringDataDTO.getTerm();
-        Double monthlyPaymentDoub = monthlyPayment.doubleValue();
+        Double monthlyPaymentDoub = monthlyPayment.doubleValue(), rateDoub = rate.doubleValue();
 
-        Double interestPayment = 0.0, debtPayment = 0.0, remainingDebt = monthlyPaymentDoub * term;
+        Double interestPayment = 0.0, debtPayment = 0.0, remainingDebt = scoringDataDTO.getAmount().doubleValue();
 
-        for (Integer i = 0; i < term; ++i) {
+        for (Integer i = 0; i <= term; ++i) {
+            if (i == term) {
+                monthlyPayment = monthlyPayment.add(
+                        new BigDecimal(remainingDebt).setScale(2, BigDecimal.ROUND_HALF_UP));
+                remainingDebt = 0.0;
+            }
             paymentScheduleElements.add(new PaymentScheduleElement(i, date, monthlyPayment,
-                    BigDecimal.valueOf(interestPayment), BigDecimal.valueOf(debtPayment),
-                    BigDecimal.valueOf(remainingDebt)));
+                    BigDecimal.valueOf(interestPayment).setScale(2, BigDecimal.ROUND_HALF_UP),
+                    BigDecimal.valueOf(debtPayment).setScale(2, BigDecimal.ROUND_HALF_UP),
+                    BigDecimal.valueOf(remainingDebt).setScale(2, BigDecimal.ROUND_HALF_UP)));
             //изменяем инфу
+            //interestPayment = 0.01 * remainingDebt * term / 12;
             date = date.plusMonths(1);
-            interestPayment = 0.01 * remainingDebt * term / 12;
+            interestPayment = 0.01 * remainingDebt * rateDoub * date.lengthOfMonth() / date.lengthOfYear();
+            //interestPayment = 0.01 * remainingDebt;
             debtPayment = monthlyPaymentDoub - interestPayment;
-            remainingDebt = remainingDebt - monthlyPaymentDoub;
+            remainingDebt = remainingDebt - debtPayment;
         }
 
         return paymentScheduleElements;
+    }
+
+    public boolean checkScoringDataDTO(ScoringDataDTO scoringDataDTO, BigDecimal insurance) {
+        //если страховки нет, передаем 0
+        if (scoringDataDTO.getEmployment().getEmploymentStatus() == EmploymentStatus.UNEMPLOYED) {
+            throw new IllegalArgumentException("Unsuitable candidate, Employment Status");
+        }
+
+        if ((scoringDataDTO.getEmployment().getWorkExperienceTotal() < 12) ||
+                (scoringDataDTO.getEmployment().getWorkExperienceCurrent() < 3)) {
+            throw new IllegalArgumentException("Unsuitable candidate, Work Experience/Current Total");
+        }
+
+        Double diffCreditAndSalary = scoringDataDTO.getEmployment().getSalary().doubleValue() * 20
+                - scoringDataDTO.getAmount().doubleValue() - insurance.doubleValue();
+        if (diffCreditAndSalary < 0) {
+            throw new IllegalArgumentException("Unsuitable candidate, low Salary");
+        }
+
+        LocalDate localDateNow = LocalDate.now();
+        long years = scoringDataDTO.getBirthdate().until(localDateNow, ChronoUnit.YEARS);
+
+        if (years < 20 || years > 60) {
+            throw new IllegalArgumentException("Unsuitable candidate, Age");
+        }
+        return true;
     }
 
 }
