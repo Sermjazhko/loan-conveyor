@@ -38,10 +38,15 @@
   3. Ответ на API - список из 4х LoanOfferDTO от "худшего" к "лучшему" (чем меньше итоговая ставка, тем лучше).
 
 Пример работы:
+
 Тело запроса:
+
+
 ![image](https://github.com/Sermjazhko/conveyor/assets/43463670/0c7c6aed-294b-40a0-8c6a-a188c4881875)
 
 Результат:
+
+
 ![image](https://github.com/Sermjazhko/conveyor/assets/43463670/6117db8c-6551-4ab5-8dd5-7769391e9234)
 ![image](https://github.com/Sermjazhko/conveyor/assets/43463670/6ab6427d-9634-471b-bf5d-d10339405045)
 
@@ -50,6 +55,8 @@
 Предложения в порядке от "худшего" к "лучшему" на основании итоговой ставки.
 
 Для первого и последнего случаев результат работы кредитного калькулятора (в кредитном калькуляторе округление до рублей, без копеек): 
+
+
 ![image](https://github.com/Sermjazhko/conveyor/assets/43463670/07567be3-acef-4f56-a865-5b384744ced0)
 ![image](https://github.com/Sermjazhko/conveyor/assets/43463670/1b1862ef-0c0e-4f05-9651-7d635b183e2d)
 
@@ -60,24 +67,30 @@
 2. Происходит скоринг данных, высчитывание ставки(rate), полная стоимость кредита(psk), размер ежемесячного платежа(monthlyPayment), график ежемесячных платежей (List<PaymentScheduleElement>).
 3. Логика расчета параметров кредита:
 Формула ПСК:
+
 ![image](https://github.com/Sermjazhko/conveyor/assets/43463670/3db550a2-727d-43fb-86cd-c7d75e937e6c)
 
 Где S - сумма всех платежей,S0 - сумма от банка и n - количество лет погашения ссуд.
 Формула для ежемесячного платежа (в коде эта же формула, просто преобразованная так, чтобы вынести минус из степени):
+
 ![image](https://github.com/Sermjazhko/conveyor/assets/43463670/4d4af678-9dff-419a-8558-0dd9d864d1a1)
  
 4. Ответ на API - CreditDTO, насыщенный всеми рассчитанными параметрами.
 
 Пример работы:
+
 Тело запроса:
+
 ![image](https://github.com/Sermjazhko/conveyor/assets/43463670/f5f78ce9-d9c1-4f0a-8705-8f6726d3d35f)
 
 Результат (часть из 12 месяцев): 
+
 ![image](https://github.com/Sermjazhko/conveyor/assets/43463670/5c32b259-b8c5-4617-aa88-120a67a78356)
 ![image](https://github.com/Sermjazhko/conveyor/assets/43463670/8d00027d-94a0-4800-adab-0016f40ffbb3)
 ![image](https://github.com/Sermjazhko/conveyor/assets/43463670/3453d5b1-bb33-4eee-96e4-b92f69e520d5)
 
 Результат кредитного калькулятора: 
+
 ![image](https://github.com/Sermjazhko/conveyor/assets/43463670/3c800b04-7282-49ee-ab53-ae22a5869f82)
 ![image](https://github.com/Sermjazhko/conveyor/assets/43463670/47814a22-299b-4d47-8339-bfa8145bbcd4)
 
@@ -90,6 +103,7 @@
 <h3> Пометка к тестам </h3>
 
 Тест, который сравнивался с кредитным калькулятором: 
+
 ![image](https://github.com/Sermjazhko/conveyor/assets/43463670/529500c9-1592-4eeb-b0de-b8240fdd9882)
 
 ![image](https://github.com/Sermjazhko/conveyor/assets/43463670/03b2bd31-4b47-4fce-a6f5-e396ca049055)
