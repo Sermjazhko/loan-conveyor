@@ -69,7 +69,6 @@
 ![image](https://github.com/Sermjazhko/conveyor/assets/43463670/07567be3-acef-4f56-a865-5b384744ced0)
 ![image](https://github.com/Sermjazhko/conveyor/assets/43463670/1b1862ef-0c0e-4f05-9651-7d635b183e2d)
 
-  
 2) POST: /conveyor/calculation - валидация присланных данных + скоринг данных + полный расчет параметров кредита. Request - ScoringDataDTO, response CreditDTO.
 Логика работы:
 
