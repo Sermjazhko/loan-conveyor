@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-@Tag(name="Conveyor controller", description="Реализовывает бизнес-логику кредитного конвейера")
+@Tag(name="Conveyor controller", description="Implements the business logic of the credit pipeline")
 @RestController
 @RequestMapping("/conveyor")
 public class ConveyorController {
