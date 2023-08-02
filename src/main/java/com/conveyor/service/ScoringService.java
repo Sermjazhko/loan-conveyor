@@ -2,15 +2,13 @@ package com.conveyor.service;
 
 import com.conveyor.dto.PaymentScheduleElement;
 import com.conveyor.dto.ScoringDataDTO;
-import com.conveyor.scoring.EmploymentStatus;
-import com.conveyor.scoring.Gender;
-import com.conveyor.scoring.MaritalStatus;
-import com.conveyor.scoring.Position;
+import com.conveyor.scoring.*;
 import org.springframework.stereotype.Service;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -36,7 +34,7 @@ public class ScoringService {
                 rate = BigDecimal.valueOf(3);
                 break;
             default:
-                throw new IllegalArgumentException("Not employment status");
+                throw new IllegalArgumentException("Incorrect employment status");
         }
 
         return rate;
@@ -57,7 +55,7 @@ public class ScoringService {
                 rate = BigDecimal.valueOf(-4);
                 break;
             default:
-                throw new IllegalArgumentException("Not position");
+                throw new IllegalArgumentException("Incorrect position");
         }
 
         return rate;
@@ -75,7 +73,7 @@ public class ScoringService {
                 rate = BigDecimal.valueOf(-1);
                 break;
             default:
-                throw new IllegalArgumentException("Not marital status");
+                throw new IllegalArgumentException("Incorrect marital status");
         }
 
         return rate;
@@ -112,7 +110,7 @@ public class ScoringService {
                 rate = BigDecimal.valueOf(3);
                 break;
             default:
-                throw new IllegalArgumentException("Not gender");
+                throw new IllegalArgumentException("Incorrect gender");
         }
 
         return rate;
@@ -182,7 +180,7 @@ public class ScoringService {
         Double interestRate = rate.doubleValue() * 0.01 / 12;
         Double payment = requestedAmount.doubleValue() * (interestRate + interestRate / (pow(1 + interestRate, term) - 1));
 
-        BigDecimal result = BigDecimal.valueOf(payment).setScale(2, BigDecimal.ROUND_HALF_UP);
+        BigDecimal result = BigDecimal.valueOf(payment).setScale(2, RoundingMode.HALF_UP);
 
         return result;
     }
@@ -193,7 +191,7 @@ public class ScoringService {
         Double psk = 1200 * ((term.doubleValue() * monthlyPayment.doubleValue()) /
                 requestedAmount.doubleValue() - 1) / term;
 
-        BigDecimal result = BigDecimal.valueOf(psk).setScale(2, BigDecimal.ROUND_HALF_UP);
+        BigDecimal result = BigDecimal.valueOf(psk).setScale(2, RoundingMode.HALF_UP);
 
         return result;
     }
@@ -212,13 +210,13 @@ public class ScoringService {
         for (Integer i = 0; i <= term; ++i) {
             if (i == term) {
                 monthlyPayment = monthlyPayment.add(
-                        new BigDecimal(remainingDebt).setScale(2, BigDecimal.ROUND_HALF_UP));
+                        new BigDecimal(remainingDebt).setScale(2, RoundingMode.HALF_UP));
                 remainingDebt = 0.0;
             }
             paymentScheduleElements.add(new PaymentScheduleElement(i, date, monthlyPayment,
-                    BigDecimal.valueOf(interestPayment).setScale(2, BigDecimal.ROUND_HALF_UP),
-                    BigDecimal.valueOf(debtPayment).setScale(2, BigDecimal.ROUND_HALF_UP),
-                    BigDecimal.valueOf(remainingDebt).setScale(2, BigDecimal.ROUND_HALF_UP)));
+                    BigDecimal.valueOf(interestPayment).setScale(2, RoundingMode.HALF_UP),
+                    BigDecimal.valueOf(debtPayment).setScale(2, RoundingMode.HALF_UP),
+                    BigDecimal.valueOf(remainingDebt).setScale(2, RoundingMode.HALF_UP)));
             //изменяем инфу
             //interestPayment = 0.01 * remainingDebt * term / 12;
             date = date.plusMonths(1);

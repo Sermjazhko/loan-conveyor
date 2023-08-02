@@ -1,14 +1,9 @@
 package com.conveyor.service;
 
 import com.conveyor.dto.*;
-import com.conveyor.scoring.EmploymentStatus;
-import com.conveyor.scoring.Gender;
-import com.conveyor.scoring.MaritalStatus;
-import com.conveyor.scoring.Position;
+import com.conveyor.scoring.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -19,7 +14,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -36,7 +30,7 @@ class ConveyorServiceImplTest {
     private ConveyorServiceImpl conveyorService;
 
     @Test
-    void getOffers() throws IOException {
+    void testGetOffers() throws IOException {
         //просто проверка на то, что все данные пришли, вызвались и вышли
         //в лекциях сплошной тест для корректности создания, поэтому без разбивки на разные тесты
         LoanApplicationRequestDTO loanApplicationRequestDTO = new LoanApplicationRequestDTO();
@@ -84,7 +78,7 @@ class ConveyorServiceImplTest {
     }
 
     @Test
-    void getOffersWhenNull_thenThrow() {
+    void testGetOffersWhenNull_thenThrow() {
         assertThrows(NullPointerException.class, () -> {
                     LoanApplicationRequestDTO loanApplicationRequestDTO = null;
                     List<LoanOfferDTO> offers = conveyorService.getOffers(loanApplicationRequestDTO);
@@ -93,7 +87,7 @@ class ConveyorServiceImplTest {
     }
 
     @Test
-    void getCalculation() throws IOException {
+    void testGetCalculation() throws IOException {
         //просто проверка на то, что все данные пришли, вызвались и вышли
         ScoringDataDTO scoringDataDTO = new ScoringDataDTO();
 
@@ -174,7 +168,7 @@ class ConveyorServiceImplTest {
     }
 
     @Test
-    void getCalculationWhenNull_thenThrow() {
+    void testGetCalculationWhenNull_thenThrow() {
         assertThrows(NullPointerException.class, () -> {
                     ScoringDataDTO scoringDataDTO = null;
                     when(scoringService.getBaseRateAndInsurance()).thenReturn(

@@ -3,10 +3,7 @@ package com.conveyor.service;
 import com.conveyor.dto.EmploymentDTO;
 import com.conveyor.dto.PaymentScheduleElement;
 import com.conveyor.dto.ScoringDataDTO;
-import com.conveyor.scoring.EmploymentStatus;
-import com.conveyor.scoring.Gender;
-import com.conveyor.scoring.MaritalStatus;
-import com.conveyor.scoring.Position;
+import com.conveyor.scoring.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -17,98 +14,95 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ScoringServiceTest {
-
 
     @InjectMocks
     private ScoringService scoringService;
 
     @Test
-    void getEmploymentStatusWhenSELF_EMPLOYED_thenReturn1() {
+    void testGetEmploymentStatusWhenSELF_EMPLOYED_thenReturn1() {
         BigDecimal rate = scoringService.getEmploymentStatus(EmploymentStatus.SELF_EMPLOYED);
         assertEquals(rate, new BigDecimal("1"));
     }
 
     @Test
-    void getEmploymentStatusWhenBUSINESS_thenReturn1() {
+    void testGetEmploymentStatusWhenBUSINESS_thenReturn1() {
         BigDecimal rate = scoringService.getEmploymentStatus(EmploymentStatus.BUSINESS);
         assertEquals(rate, new BigDecimal("3"));
     }
 
     @Test
-    void getEmploymentStatusWhenOther_thenThrow() {
+    void testGetEmploymentStatusWhenOther_thenThrow() {
         Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
-                    scoringService.getEmploymentStatus(EmploymentStatus.NOT);
+                    scoringService.getEmploymentStatus(EmploymentStatus.INCORRECT_EMPLOYMENT_STATUS);
                 }
         );
-        assertEquals("Not employment status", exception.getMessage());
+        assertEquals("Incorrect employment status", exception.getMessage());
     }
 
 
     @Test
-    void getPositionWhenMANAGER_thenReturn0() {
+    void testGetPositionWhenMANAGER_thenReturn0() {
         BigDecimal rate = scoringService.getPosition(Position.MANAGER);
         assertEquals(rate, new BigDecimal("0"));
     }
 
     @Test
-    void getPositionWhenMIDDLE_MANAGER_thenReturnMin2() {
+    void testGetPositionWhenMIDDLE_MANAGER_thenReturnMin2() {
         BigDecimal rate = scoringService.getPosition(Position.MIDDLE_MANAGER);
         assertEquals(rate, new BigDecimal("-2"));
     }
 
     @Test
-    void getPositionWhenTOP_MANAGER_thenReturnMin4() {
+    void testGetPositionWhenTOP_MANAGER_thenReturnMin4() {
         BigDecimal rate = scoringService.getPosition(Position.TOP_MANAGER);
         assertEquals(rate, new BigDecimal("-4"));
     }
 
     @Test
-    void getPositionWhenOther_thenThrow() {
+    void testGetPositionWhenOther_thenThrow() {
         Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
-                    scoringService.getPosition(Position.NOT);
+                    scoringService.getPosition(Position.INCORRECT_POSITION);
                 }
         );
-        assertEquals("Not position", exception.getMessage());
+        assertEquals("Incorrect position", exception.getMessage());
     }
 
     @Test
-    void getMaritalStatusWhenMARRIED_thenReturnMin3() {
+    void testGetMaritalStatusWhenMARRIED_thenReturnMin3() {
         BigDecimal rate = scoringService.getMaritalStatus(MaritalStatus.MARRIED);
         assertEquals(rate, new BigDecimal("-3"));
     }
 
     @Test
-    void getMaritalStatusWhenNOT_MARRIED_thenReturnMin1() {
+    void testGetMaritalStatusWhenNOT_MARRIED_thenReturnMin1() {
         BigDecimal rate = scoringService.getMaritalStatus(MaritalStatus.NOT_MARRIED);
         assertEquals(rate, new BigDecimal("-1"));
     }
 
     @Test
-    void getMaritalStatusWhenOther_thenThrow() {
+    void testGetMaritalStatusWhenOther_thenThrow() {
         Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
-                    scoringService.getMaritalStatus(MaritalStatus.NOT);
+                    scoringService.getMaritalStatus(MaritalStatus.INCORRECT_MARITAL_STATUS);
                 }
         );
-        assertEquals("Not marital status", exception.getMessage());
+        assertEquals("Incorrect marital status", exception.getMessage());
     }
 
     @Test
-    void getDependentAmountWhenMore1_then1() {
+    void testGetDependentAmountWhenMore1_then1() {
         Integer dependentAmount = 3;
         BigDecimal rate = scoringService.getDependentAmount(dependentAmount);
         assertEquals(new BigDecimal("1"), rate);
     }
 
     @Test
-    void getDependentAmountWhenLess1_then0() {
+    void testGetDependentAmountWhenLess1_then0() {
         Integer dependentAmount = 1;
         BigDecimal rate = scoringService.getDependentAmount(dependentAmount);
         assertEquals(new BigDecimal("0"), rate);
@@ -117,7 +111,7 @@ class ScoringServiceTest {
 
     @ParameterizedTest
     @ValueSource(ints = {1988, 1980, 1970, 1963})
-    void getGenderWhenSuitableWOMAN_thenReturnMin3(int years) {
+    void testGetGenderWhenSuitableWOMAN_thenReturnMin3(int years) {
         LocalDate birthday = LocalDate.of(years, 1, 1);
 
         BigDecimal rate = scoringService.getGender(Gender.WOMAN, birthday);
@@ -126,7 +120,7 @@ class ScoringServiceTest {
 
     @ParameterizedTest
     @ValueSource(ints = {1990, 1989, 1962, 1950})
-    void getGenderWhenUnsuitableWOMAN_thenReturn0(int years) {
+    void testGetGenderWhenUnsuitableWOMAN_thenReturn0(int years) {
         LocalDate birthday = LocalDate.of(years, 1, 1);
 
         BigDecimal rate = scoringService.getGender(Gender.WOMAN, birthday);
@@ -135,7 +129,7 @@ class ScoringServiceTest {
 
     @ParameterizedTest
     @ValueSource(ints = {1993, 1980, 1970, 1968})
-    void getGenderWhenSuitableMAN_thenReturnMin3(int years) {
+    void testGetGenderWhenSuitableMAN_thenReturnMin3(int years) {
         LocalDate birthday = LocalDate.of(years, 1, 1);
 
         BigDecimal rate = scoringService.getGender(Gender.MAN, birthday);
@@ -144,7 +138,7 @@ class ScoringServiceTest {
 
     @ParameterizedTest
     @ValueSource(ints = {2000, 1994, 1967, 1950})
-    void getGenderWhenUnsuitableMAN_thenReturn0(int years) {
+    void testGetGenderWhenUnsuitableMAN_thenReturn0(int years) {
         LocalDate birthday = LocalDate.of(years, 1, 1);
 
         BigDecimal rate = scoringService.getGender(Gender.MAN, birthday);
@@ -152,7 +146,7 @@ class ScoringServiceTest {
     }
 
     @Test
-    void getGenderWhenOTHER_thenReturn3() {
+    void testGetGenderWhenOTHER_thenReturn3() {
         LocalDate birthday = LocalDate.of(2000, 1, 1);
 
         BigDecimal rate = scoringService.getGender(Gender.OTHER, birthday);
@@ -160,18 +154,18 @@ class ScoringServiceTest {
     }
 
     @Test
-    void getGenderWhenDefault_thenThrow() {
+    void testGetGenderWhenDefault_thenThrow() {
         Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
                     LocalDate birthday = LocalDate.of(2000, 1, 1);
 
-                    scoringService.getGender(Gender.NOT, birthday);
+                    scoringService.getGender(Gender.INCORRECT_GENDER, birthday);
                 }
         );
-        assertEquals("Not gender", exception.getMessage());
+        assertEquals("Incorrect gender", exception.getMessage());
     }
 
     @Test
-    void getBaseRateAndInsurance() throws IOException {
+    void testGetBaseRateAndInsurance() throws IOException {
         List<BigDecimal> file = scoringService.getBaseRateAndInsurance();
 
         assertEquals(new BigDecimal("15"), file.get(0));
@@ -179,7 +173,7 @@ class ScoringServiceTest {
     }
 
     @Test
-    void totalAmountByServicesWithInsurance() throws IOException {
+    void testTotalAmountByServicesWithInsurance() throws IOException {
         BigDecimal amount = new BigDecimal("15000");
         BigDecimal result = scoringService.totalAmountByServices(amount, true);
 
@@ -187,7 +181,7 @@ class ScoringServiceTest {
     }
 
     @Test
-    void totalAmountByServicesWithoutInsurance() throws IOException {
+    void testTotalAmountByServicesWithoutInsurance() throws IOException {
         BigDecimal amount = new BigDecimal("15000");
         BigDecimal result = scoringService.totalAmountByServices(amount, false);
 
@@ -195,7 +189,7 @@ class ScoringServiceTest {
     }
 
     @Test
-    void calculateRateWhenFalseIAndFalseS() throws IOException {
+    void testCalculateRateWhenFalseIAndFalseS() throws IOException {
         BigDecimal result = scoringService.calculateRate(false, false);
         BigDecimal rate = new BigDecimal("15");
 
@@ -203,7 +197,7 @@ class ScoringServiceTest {
     }
 
     @Test
-    void calculateRateWhenFalseIAndTrueS() throws IOException {
+    void testCalculateRateWhenFalseIAndTrueS() throws IOException {
         BigDecimal result = scoringService.calculateRate(false, true);
         BigDecimal rate = new BigDecimal("14");
 
@@ -211,7 +205,7 @@ class ScoringServiceTest {
     }
 
     @Test
-    void calculateRateWhenTrueIAndFalseS() throws IOException {
+    void testCalculateRateWhenTrueIAndFalseS() throws IOException {
         BigDecimal result = scoringService.calculateRate(true, false);
         BigDecimal rate = new BigDecimal("12");
 
@@ -219,7 +213,7 @@ class ScoringServiceTest {
     }
 
     @Test
-    void calculateRateWhenTrueIAndTrueS() throws IOException {
+    void testCalculateRateWhenTrueIAndTrueS() throws IOException {
         BigDecimal result = scoringService.calculateRate(true, true);
         BigDecimal rate = new BigDecimal("11");
 
@@ -227,7 +221,7 @@ class ScoringServiceTest {
     }
 
     @Test
-    void scoringRate() {
+    void testScoringRate() {
         //уже проверено, что выдается верный результат, поэтому просто тестик на корректность
         BigDecimal rate = new BigDecimal("11");
 
@@ -252,7 +246,7 @@ class ScoringServiceTest {
     }
 
     @Test
-    void getAnnuityPayment() {
+    void testGetAnnuityPayment() {
         BigDecimal rate = new BigDecimal("11");
         BigDecimal amount = new BigDecimal("10000");
         Integer term = 12;
@@ -263,7 +257,7 @@ class ScoringServiceTest {
     }
 
     @Test
-    void getPSK() {
+    void testGetPSK() {
         Integer term = 12;
         BigDecimal monthlyPayment = new BigDecimal("883.82");
         BigDecimal amount = new BigDecimal("10000");
@@ -274,8 +268,11 @@ class ScoringServiceTest {
     }
 
     @Test
-    void createListPayment() {
+    void testCreateListPayment() {
         //это всё сравнивалось с каким-то калькулятором из интернета
+        //(акцент теста на этом, поэтому смысла переносить сюда свои расчеты не вижу)
+        //для этого теста либо ставить фиксированную дату в createListPayment
+        //либо менять каждый месяц расчеты в соответствии с калькулятором из интернета)
         BigDecimal monthlyPayment = new BigDecimal("1051.11");
         BigDecimal rate = new BigDecimal("11");
         ScoringDataDTO scoringDataDTO = new ScoringDataDTO();
@@ -285,14 +282,14 @@ class ScoringServiceTest {
         List<PaymentScheduleElement> paymentScheduleElements = scoringService.createListPayment(monthlyPayment,
                 scoringDataDTO, rate);
 
-        assertEquals(new BigDecimal("986.94"), paymentScheduleElements.get(4).getDebtPayment());
-        assertEquals(new BigDecimal("35.85"), paymentScheduleElements.get(7).getInterestPayment());
-        assertEquals(new BigDecimal("7097.27"), paymentScheduleElements.get(3).getRemainingDebt());
-        assertEquals(new BigDecimal("1052.67"), paymentScheduleElements.get(10).getTotalPayment());
+        assertEquals(new BigDecimal("984.83"), paymentScheduleElements.get(4).getDebtPayment());
+        assertEquals(new BigDecimal("38.28"), paymentScheduleElements.get(7).getInterestPayment());
+        assertEquals(new BigDecimal("7094.52"), paymentScheduleElements.get(3).getRemainingDebt());
+        assertEquals(new BigDecimal("1050.55"), paymentScheduleElements.get(10).getTotalPayment());
     }
 
     @Test
-    void checkScoringDataDTO() {
+    void testCheckScoringDataDTO() {
         ScoringDataDTO scoringDataDTO = new ScoringDataDTO();
         EmploymentDTO employmentDTO = new EmploymentDTO(EmploymentStatus.SELF_EMPLOYED,
                 "123123134", BigDecimal.valueOf(5000),
@@ -312,7 +309,7 @@ class ScoringServiceTest {
     }
 
     @Test
-    void whenEmploymentStatusUNEMPLOYED_whenThrow() {
+    void testWhenEmploymentStatusUNEMPLOYED_whenThrow() {
         Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
                     ScoringDataDTO scoringDataDTO = new ScoringDataDTO();
                     EmploymentDTO employmentDTO = new EmploymentDTO(EmploymentStatus.UNEMPLOYED,
@@ -328,7 +325,7 @@ class ScoringServiceTest {
     }
 
     @Test
-    void whenWorkExperienceTotalLess12_whenThrow() {
+    void testWhenWorkExperienceTotalLess12_whenThrow() {
         Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
                     ScoringDataDTO scoringDataDTO = new ScoringDataDTO();
                     EmploymentDTO employmentDTO = new EmploymentDTO(EmploymentStatus.SELF_EMPLOYED,
@@ -344,7 +341,7 @@ class ScoringServiceTest {
     }
 
     @Test
-    void whenWorkExperienceCurrentLess3_whenThrow() {
+    void testWhenWorkExperienceCurrentLess3_whenThrow() {
         Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
                     ScoringDataDTO scoringDataDTO = new ScoringDataDTO();
                     EmploymentDTO employmentDTO = new EmploymentDTO(EmploymentStatus.SELF_EMPLOYED,
@@ -360,7 +357,7 @@ class ScoringServiceTest {
     }
 
     @Test
-    void whenDiffCreditAndSalaryMore20Salary_whenThrow() {
+    void testWhenDiffCreditAndSalaryMore20Salary_whenThrow() {
         Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
                     ScoringDataDTO scoringDataDTO = new ScoringDataDTO();
                     EmploymentDTO employmentDTO = new EmploymentDTO(EmploymentStatus.SELF_EMPLOYED,
@@ -380,7 +377,7 @@ class ScoringServiceTest {
 
     @ParameterizedTest
     @ValueSource(ints = {2015, 1962})
-    void whenCandidateIsUnder20orOver60_whenThrow(int years) {
+    void testWhenCandidateIsUnder20orOver60_whenThrow(int years) {
         Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
                     ScoringDataDTO scoringDataDTO = new ScoringDataDTO();
                     EmploymentDTO employmentDTO = new EmploymentDTO(EmploymentStatus.SELF_EMPLOYED,

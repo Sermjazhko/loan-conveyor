@@ -1,7 +1,6 @@
 package com.conveyor.service;
 
 import com.conveyor.dto.*;
-import com.conveyor.validation.DataValidation;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -47,19 +46,20 @@ public class ConveyorServiceImpl implements ConveyorService {
         Long id = idApp++; //чисто в теории, наверное, id может потом из бд быть известно,
         // сейчас немного непонятно, как формируется, поэтому очень нубно
 
-        LoanOfferDTO loanOfferDTO = new LoanOfferDTO(
-                id,
-                loanApplicationRequestDTO.getAmount(),
-                totalAmount,
-                loanApplicationRequestDTO.getTerm(),
-                monthlyPayment,
-                rate,
-                isInsuranceEnabled,
-                isSalaryClient);
+        LoanOfferDTO loanOfferDTO = LoanOfferDTO.builder()
+                .applicationId(id)
+                .requestedAmount(loanApplicationRequestDTO.getAmount())
+                .totalAmount(totalAmount)
+                .term(loanApplicationRequestDTO.getTerm())
+                .monthlyPayment(monthlyPayment)
+                .rate(rate)
+                .isInsuranceEnabled(isInsuranceEnabled)
+                .isSalaryClient(isSalaryClient)
+                .build();
 
         log.info("Successful creation of loan offer, total amount = " + totalAmount + " new rate = " + rate);
-        return loanOfferDTO;
 
+        return loanOfferDTO;
     }
 
     @Override
@@ -97,13 +97,21 @@ public class ConveyorServiceImpl implements ConveyorService {
         List<PaymentScheduleElement> paymentScheduleElements =
                 scoringService.createListPayment(monthlyPayment, scoringDataDTO, rate);
 
-        return new CreditDTO(requestedAmount,
-                term,
-                monthlyPayment,
-                rate,
-                psk,
-                scoringDataDTO.getIsInsuranceEnabled(),
-                scoringDataDTO.getIsSalaryClient(),
-                paymentScheduleElements);
+        log.info("payment schedule = " + paymentScheduleElements);
+
+        CreditDTO creditDTO = CreditDTO.builder()
+                .amount(requestedAmount)
+                .term(term)
+                .monthlyPayment(monthlyPayment)
+                .rate(rate)
+                .psk(psk)
+                .isInsuranceEnabled(scoringDataDTO.getIsInsuranceEnabled())
+                .isSalaryClient(scoringDataDTO.getIsSalaryClient())
+                .paymentSchedule(paymentScheduleElements)
+                .build();
+
+        log.info("Credit: " + creditDTO);
+
+        return creditDTO;
     }
 }
