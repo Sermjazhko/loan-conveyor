@@ -29,12 +29,15 @@
 <h3> Реализованные API: </h3>
 1) POST: /conveyor/offers - расчёт возможных условий кредита. Request - LoanApplicationRequestDTO, response - List<LoanOfferDTO>.
   Логика работы: 
+  
   1. По API приходит LoanApplicationRequestDTO.
+
   2. На основании LoanApplicationRequestDTO происходит прескоринг. 
   Создаётся 4 кредитных предложения LoanOfferDTO на основании всех возможных комбинаций булевских полей isInsuranceEnabled и isSalaryClient (false-false, false-true, true-false, true-true). 
   Логика формирования кредитных предложений: в зависимости от страховых услуг уменьшается процентная ставка (на 3) и сумма кредита (на 1). 
   Базовая ставка (15) хардкодится в коде через property файл. 
   Цена страховки 100к (фиксированная, также находится в property файле), ее стоимость добавляется в тело кредита.
+
   3. Ответ на API - список из 4х LoanOfferDTO от "худшего" к "лучшему" (чем меньше итоговая ставка, тем лучше).
 
 Пример работы:
@@ -62,10 +65,14 @@
 
   
 2) POST: /conveyor/calculation - валидация присланных данных + скоринг данных + полный расчет параметров кредита. Request - ScoringDataDTO, response CreditDTO.
-Логика работы: 
+Логика работы:
+
 1. По API приходит ScoringDataDTO.
+
 2. Происходит скоринг данных, высчитывание ставки(rate), полная стоимость кредита(psk), размер ежемесячного платежа(monthlyPayment), график ежемесячных платежей (List<PaymentScheduleElement>).
+
 3. Логика расчета параметров кредита:
+
 Формула ПСК:
 
 ![image](https://github.com/Sermjazhko/conveyor/assets/43463670/3db550a2-727d-43fb-86cd-c7d75e937e6c)
