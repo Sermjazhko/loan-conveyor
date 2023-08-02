@@ -5,7 +5,6 @@ import com.conveyor.dto.LoanApplicationRequestDTO;
 import com.conveyor.dto.LoanOfferDTO;
 import com.conveyor.dto.ScoringDataDTO;
 import com.conveyor.service.ConveyorService;
-import com.conveyor.service.ConveyorServiceImpl;
 import com.conveyor.validation.DataValidation;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

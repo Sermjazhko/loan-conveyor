@@ -99,7 +99,8 @@ class ConveyorServiceImplTest {
                 LocalDate.of(2020, 12, 12);
         Gender gender = Gender.MAN;
         MaritalStatus maritalStatus = MaritalStatus.MARRIED;
-        EmploymentDTO employmentDTO = new EmploymentDTO(EmploymentStatus.SELF_EMPLOYED, "123123134", BigDecimal.valueOf(50000),
+        EmploymentDTO employmentDTO = new EmploymentDTO(EmploymentStatus.SELF_EMPLOYED, "123123134",
+                BigDecimal.valueOf(50000),
                 Position.MIDDLE_MANAGER, 20, 20);
 
 
