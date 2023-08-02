@@ -3,6 +3,8 @@ package com.conveyor.dto;
 import java.math.BigDecimal;
 import java.util.Objects;
 
+import com.conveyor.scoring.EmploymentStatus;
+import com.conveyor.scoring.Position;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,11 +19,11 @@ import lombok.Setter;
 public class EmploymentDTO {
 
     @Schema(description = "Employee status: self-employed/unemployed/business")
-    private Enum employmentStatus;
+    private EmploymentStatus employmentStatus;
     private String employerINN;
     private BigDecimal salary;
     @Schema(description = "Position in the company: manager, middle manager, top manager")
-    private Enum position;
+    private Position position;
     private Integer workExperienceTotal;
     private Integer workExperienceCurrent;
 

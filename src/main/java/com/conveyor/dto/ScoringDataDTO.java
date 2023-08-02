@@ -3,6 +3,8 @@ package com.conveyor.dto;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+import com.conveyor.scoring.Gender;
+import com.conveyor.scoring.MaritalStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,13 +23,13 @@ public class ScoringDataDTO {
     private String firstName;
     private String lastName;
     private String middleName;
-    private Enum gender;
+    private Gender gender;
     private LocalDate birthdate;
     private String passportSeries;
     private String passportNumber;
     private LocalDate passportIssueDate;
     private String passportIssueBranch;
-    private Enum maritalStatus;
+    private MaritalStatus maritalStatus;
     private Integer dependentAmount;
     private EmploymentDTO employment;
     private String account;

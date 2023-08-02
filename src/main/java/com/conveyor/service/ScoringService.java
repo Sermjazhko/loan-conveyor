@@ -197,15 +197,22 @@ public class ScoringService {
     }
 
     public List<PaymentScheduleElement> createListPayment(BigDecimal monthlyPayment, ScoringDataDTO scoringDataDTO,
-                                                          BigDecimal rate) {
+                                                          BigDecimal rate) throws IOException {
 
         List<PaymentScheduleElement> paymentScheduleElements = new ArrayList<>();
+
+        Double insurance = 0.0;
+
+        if (scoringDataDTO.getIsInsuranceEnabled()) {
+            insurance = getBaseRateAndInsurance().get(1).doubleValue();
+        }
 
         LocalDate date = LocalDate.now();
         Integer term = scoringDataDTO.getTerm();
         Double monthlyPaymentDoub = monthlyPayment.doubleValue(), rateDoub = rate.doubleValue();
 
-        Double interestPayment = 0.0, debtPayment = 0.0, remainingDebt = scoringDataDTO.getAmount().doubleValue();
+        Double interestPayment = 0.0, debtPayment = 0.0, remainingDebt = scoringDataDTO.getAmount().doubleValue() +
+                insurance;
 
         for (Integer i = 0; i <= term; ++i) {
             if (i == term) {
@@ -218,9 +225,9 @@ public class ScoringService {
                     BigDecimal.valueOf(debtPayment).setScale(2, RoundingMode.HALF_UP),
                     BigDecimal.valueOf(remainingDebt).setScale(2, RoundingMode.HALF_UP)));
             //изменяем инфу
-            //interestPayment = 0.01 * remainingDebt * term / 12;
+            interestPayment = remainingDebt * (0.01 * rateDoub / 12);
             date = date.plusMonths(1);
-            interestPayment = 0.01 * remainingDebt * rateDoub * date.lengthOfMonth() / date.lengthOfYear();
+            //interestPayment = 0.01 * remainingDebt * rateDoub * date.lengthOfMonth() / date.lengthOfYear();
             //interestPayment = 0.01 * remainingDebt;
             debtPayment = monthlyPaymentDoub - interestPayment;
             remainingDebt = remainingDebt - debtPayment;

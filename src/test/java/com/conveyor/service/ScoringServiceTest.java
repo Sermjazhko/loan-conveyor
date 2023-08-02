@@ -268,24 +268,23 @@ class ScoringServiceTest {
     }
 
     @Test
-    void testCreateListPayment() {
+    void testCreateListPayment() throws IOException {
         //это всё сравнивалось с каким-то калькулятором из интернета
-        //(акцент теста на этом, поэтому смысла переносить сюда свои расчеты не вижу)
-        //для этого теста либо ставить фиксированную дату в createListPayment
-        //либо менять каждый месяц расчеты в соответствии с калькулятором из интернета)
         BigDecimal monthlyPayment = new BigDecimal("1051.11");
         BigDecimal rate = new BigDecimal("11");
         ScoringDataDTO scoringDataDTO = new ScoringDataDTO();
         scoringDataDTO.setTerm(10);
         scoringDataDTO.setAmount(new BigDecimal("10000"));
+        scoringDataDTO.setIsInsuranceEnabled(false);
 
         List<PaymentScheduleElement> paymentScheduleElements = scoringService.createListPayment(monthlyPayment,
                 scoringDataDTO, rate);
 
-        assertEquals(new BigDecimal("984.83"), paymentScheduleElements.get(4).getDebtPayment());
-        assertEquals(new BigDecimal("38.28"), paymentScheduleElements.get(7).getInterestPayment());
-        assertEquals(new BigDecimal("7094.52"), paymentScheduleElements.get(3).getRemainingDebt());
-        assertEquals(new BigDecimal("1050.55"), paymentScheduleElements.get(10).getTotalPayment());
+        //+небольшие погрешности округления в копейках
+        assertEquals(new BigDecimal("986.07"), paymentScheduleElements.get(4).getDebtPayment());
+        assertEquals(new BigDecimal("37.67"), paymentScheduleElements.get(7).getInterestPayment());
+        assertEquals(new BigDecimal("7095.20"), paymentScheduleElements.get(3).getRemainingDebt());
+        assertEquals(new BigDecimal("1051.11"), paymentScheduleElements.get(9).getTotalPayment());
     }
 
     @Test
