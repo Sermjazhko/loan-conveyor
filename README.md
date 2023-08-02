@@ -98,7 +98,9 @@
 
 <h3> Документация API </h3>
 Документация всех API производилась через Swagger, ссылка для запуска swagger-ui в браузере: <a>http://localhost:9090/swagger-ui/index.html</a>.
-![image](https://github.com/Sermjazhko/conveyor/assets/43463670/bc987e02-4b82-4f4b-926b-ad70c76412ba)
+
+![image](https://github.com/Sermjazhko/conveyor/assets/43463670/6e230b1b-51af-4f52-83e0-1c95e41a7a2d)
+
 
 <h3> Пометка к тестам </h3>
 
