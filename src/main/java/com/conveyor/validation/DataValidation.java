@@ -1,8 +1,7 @@
 package com.conveyor.validation;
 
 import com.conveyor.dto.LoanApplicationRequestDTO;
-import com.conveyor.dto.ScoringDataDTO;
-import com.conveyor.scoring.EmploymentStatus;
+import com.conveyor.service.ScoringService;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
@@ -11,10 +10,16 @@ import javax.validation.ValidatorFactory;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Set;
+import java.util.logging.Logger;
 
 public class DataValidation {
 
+    private static Logger log = Logger.getLogger(ScoringService.class.getName());
+
     public static boolean checkDate(LocalDate localDate) {
+
+        log.info("Date: " + localDate);
+
         if (localDate == null) {
             throw new NullPointerException("Date must not be null");
         }
@@ -23,6 +28,9 @@ public class DataValidation {
         }
         LocalDate localDateNow = LocalDate.now();
         long years = localDate.until(localDateNow, ChronoUnit.YEARS);
+
+        log.info("User years = " + years);
+
         if (years < 18) {
             throw new IllegalArgumentException("Age less than 18 years");
         }
@@ -31,41 +39,16 @@ public class DataValidation {
 
     public static boolean checkLoanApplicationRequestDTO(LoanApplicationRequestDTO loanApplicationRequestDTO) {
 
+        log.info("Loan application request: " + loanApplicationRequestDTO);
+
         checkDate(loanApplicationRequestDTO.getBirthdate());
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         Validator validator = factory.getValidator();
         Set<ConstraintViolation<LoanApplicationRequestDTO>> constraintViolations = validator.validate(loanApplicationRequestDTO);
-        //Show errors
         if (constraintViolations.size() > 0) {
-            /*for (ConstraintViolation<LoanApplicationRequestDTO> violation : constraintViolations) {
-                System.out.println(violation.getMessage());
-            }*/
             throw new IllegalArgumentException(constraintViolations.iterator().next().getMessage());
         } else {
             return true;
         }
-    }
-
-    public static boolean checkScoringDataDTO(ScoringDataDTO scoringDataDTO, Double insurance) {
-        //если страховки нет, передаем 0
-        if (scoringDataDTO.getEmployment().getEmploymentStatus() == EmploymentStatus.UNEMPLOYED) {
-            return false;
-        }
-        if ((scoringDataDTO.getEmployment().getWorkExperienceTotal() < 12) ||
-                (scoringDataDTO.getEmployment().getWorkExperienceCurrent() < 3)) {
-            return false;
-        }
-
-        Double diffCreditAndSalary = scoringDataDTO.getEmployment().getSalary().doubleValue() * 20
-                - scoringDataDTO.getAmount().doubleValue() - insurance;
-        if (diffCreditAndSalary < 0) {
-            return false;
-        }
-        LocalDate localDateNow = LocalDate.now();
-        long years = scoringDataDTO.getBirthdate().until(localDateNow, ChronoUnit.YEARS);
-        if (years < 20 || years > 60) {
-            return false;
-        }
-        return true;
     }
 }

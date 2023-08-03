@@ -1,19 +1,14 @@
 package com.conveyor;
 
-import com.conveyor.dto.LoanApplicationRequestDTO;
-
-import com.conveyor.validation.DataValidation;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import java.time.LocalDate;
+import java.io.IOException;
 
 @SpringBootApplication
 public class SpringBootStarter {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         SpringApplication.run(SpringBootStarter.class, args);
-        //LoanApplicationRequestDTO loanApplicationRequestDTO = new LoanApplicationRequestDTO();
-        //System.out.println("hello");
     }
 }

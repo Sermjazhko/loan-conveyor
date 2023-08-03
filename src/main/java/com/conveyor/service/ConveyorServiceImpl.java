@@ -1,156 +1,117 @@
 package com.conveyor.service;
 
-import com.conveyor.dto.CreditDTO;
-import com.conveyor.dto.LoanApplicationRequestDTO;
-import com.conveyor.dto.LoanOfferDTO;
-import com.conveyor.dto.ScoringDataDTO;
-import com.conveyor.scoring.MaritalStatus;
-import com.conveyor.scoring.ScoringRulesRate;
-import com.conveyor.validation.DataValidation;
+import com.conveyor.dto.*;
 import org.springframework.stereotype.Service;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
-
-import static java.lang.Math.*;
+import java.util.logging.Logger;
 
 @Service
 public class ConveyorServiceImpl implements ConveyorService {
+
+    private static Logger log = Logger.getLogger(ConveyorServiceImpl.class.getName());
+
+    private static Long idApp = 0L;
+
+    private final ScoringService scoringService;
+
+    public ConveyorServiceImpl(ScoringService service) {
+        this.scoringService = service;
+    }
 
     @Override
     public List<LoanOfferDTO> getOffers(LoanApplicationRequestDTO loanApplicationRequestDTO)
             throws IOException {
 
-        List<LoanOfferDTO> loanOfferDTOS = new ArrayList<>();
+        return List.of(
+                createOffer(false, false, loanApplicationRequestDTO),
+                createOffer(false, true, loanApplicationRequestDTO),
+                createOffer(true, false, loanApplicationRequestDTO),
+                createOffer(true, true, loanApplicationRequestDTO)
+        );
+    }
 
-        /*  try {*/
-        Double baseRate = getBaseRateAndInsurance().get(0);
-        Double insurance = getBaseRateAndInsurance().get(1);
+    private LoanOfferDTO createOffer(Boolean isInsuranceEnabled, Boolean isSalaryClient,
+                                     LoanApplicationRequestDTO loanApplicationRequestDTO) throws IOException {
 
-        Long id = 0L; //чисто в теории, наверное, id может потом из бд быть известно,
+        BigDecimal totalAmount = scoringService.totalAmountByServices(loanApplicationRequestDTO.getAmount(),
+                isInsuranceEnabled);
+
+        BigDecimal rate = scoringService.calculateRate(isInsuranceEnabled, isSalaryClient);
+
+        BigDecimal monthlyPayment = scoringService.getAnnuityPayment(rate, totalAmount, loanApplicationRequestDTO.getTerm());
+
+        Long id = idApp++; //чисто в теории, наверное, id может потом из бд быть известно,
         // сейчас немного непонятно, как формируется, поэтому очень нубно
 
-        Boolean isInsuranceEnabled = false, isSalaryClient = false;
-        Double newRate;
-        for (int i = 0; i < 3; i++) {
-            newRate = rateChange(baseRate, isInsuranceEnabled, isSalaryClient);
+        LoanOfferDTO loanOfferDTO = LoanOfferDTO.builder()
+                .applicationId(id)
+                .requestedAmount(loanApplicationRequestDTO.getAmount())
+                .totalAmount(totalAmount)
+                .term(loanApplicationRequestDTO.getTerm())
+                .monthlyPayment(monthlyPayment)
+                .rate(rate)
+                .isInsuranceEnabled(isInsuranceEnabled)
+                .isSalaryClient(isSalaryClient)
+                .build();
 
-            loanOfferDTOS.add(createOffer(newRate, loanApplicationRequestDTO.getAmount(),
-                    loanApplicationRequestDTO.getTerm(), id, isInsuranceEnabled, isSalaryClient, insurance));
-            id += 1;
-            isInsuranceEnabled = isSalaryClient;
-            isSalaryClient = !isSalaryClient;
-        }
-        newRate = rateChange(baseRate, true, true);
+        log.info("Successful creation of loan offer, total amount = " + totalAmount + " new rate = " + rate);
 
-        loanOfferDTOS.add(createOffer(newRate, loanApplicationRequestDTO.getAmount(),
-                loanApplicationRequestDTO.getTerm(), id, true, true, insurance));
-        /*} catch (IOException e) {
-            throw new IOException("File not found or request for file is invalid");
-        }*/
-        return loanOfferDTOS;
+        return loanOfferDTO;
     }
 
     @Override
     public CreditDTO getCalculation(ScoringDataDTO scoringDataDTO) throws IOException {
 
-        Double baseRate = getBaseRateAndInsurance().get(0);
-        Double insurance = getBaseRateAndInsurance().get(1);
-        Double requestedAmount = scoringDataDTO.getAmount().doubleValue();
+        //скоринг данных
+        BigDecimal insurance = scoringService.getBaseRateAndInsurance().get(1);
+        BigDecimal requestedAmount = scoringDataDTO.getAmount();
+        log.info("Insurance = " + insurance);
 
         if (scoringDataDTO.getIsInsuranceEnabled()) {
-            requestedAmount += insurance;
-            insurance = 0.0;
-        }
-        if (!DataValidation.checkScoringDataDTO(scoringDataDTO, insurance)) {
-            throw new IllegalArgumentException("Unsuitable candidate");
+            requestedAmount = requestedAmount.add(insurance);
+        } else {
+            insurance = new BigDecimal("0");
         }
 
-        Double rateNew = rateChange(baseRate, scoringDataDTO.getIsInsuranceEnabled(),
-                scoringDataDTO.getIsSalaryClient());
-        Double rate = scoringRate(rateNew, scoringDataDTO);
+        scoringService.checkScoringDataDTO(scoringDataDTO, insurance);
 
+        //высчитывание ставки
+        BigDecimal rate = scoringService.scoringRate(scoringService.calculateRate(scoringDataDTO.getIsInsuranceEnabled(),
+                scoringDataDTO.getIsSalaryClient()), scoringDataDTO);
 
-        //TODO пск
+        log.info("New rate = " + rate);
 
-        Double monthlyPayment = getAnnuityPayment(rate, requestedAmount, scoringDataDTO.getTerm());
+        //подсчет пск, размер ежемесячного платежа
+        BigDecimal monthlyPayment = scoringService.getAnnuityPayment(rate, requestedAmount, scoringDataDTO.getTerm());
 
-        return null;
-    }
+        log.info("Monthly payment = " + monthlyPayment);
+        Integer term = scoringDataDTO.getTerm();
+        BigDecimal psk = scoringService.getPSK(term, monthlyPayment, requestedAmount);
 
-    private Double rateChange(Double rate, Boolean isInsuranceEnabled, Boolean isSalaryClient) {
+        log.info("psk = " + psk);
 
-        Double rateNew = rate;
+        // график ежемесячных платежей
+        List<PaymentScheduleElement> paymentScheduleElements =
+                scoringService.createListPayment(monthlyPayment, scoringDataDTO, rate);
 
-        if (isInsuranceEnabled) {
-            rateNew -= 3;
-        }
-        if (isSalaryClient) {
-            rateNew -= 1;
-        }
+        log.info("payment schedule = " + paymentScheduleElements);
 
-        return rateNew;
-    }
+        CreditDTO creditDTO = CreditDTO.builder()
+                .amount(requestedAmount)
+                .term(term)
+                .monthlyPayment(monthlyPayment)
+                .rate(rate)
+                .psk(psk)
+                .isInsuranceEnabled(scoringDataDTO.getIsInsuranceEnabled())
+                .isSalaryClient(scoringDataDTO.getIsSalaryClient())
+                .paymentSchedule(paymentScheduleElements)
+                .build();
 
-    private LoanOfferDTO createOffer(Double rate, BigDecimal amount, Integer term, Long id,
-                                     Boolean isInsuranceEnabled, Boolean isSalaryClient,
-                                     Double insurance) {
+        log.info("Credit: " + creditDTO);
 
-        Double requestedAmount = amount.doubleValue();
-
-        if (isInsuranceEnabled) {
-            requestedAmount += insurance;
-        }
-
-        Double annuityPayment = getAnnuityPayment(rate, requestedAmount, term);
-        BigDecimal monthlyPayment = BigDecimal.valueOf(Math.round(annuityPayment));
-        BigDecimal totalAmount = BigDecimal.valueOf(Math.round(requestedAmount));
-
-        LoanOfferDTO loanOfferDTO = new LoanOfferDTO(id, BigDecimal.valueOf(requestedAmount),
-                totalAmount, term, monthlyPayment, BigDecimal.valueOf(rate),
-                isInsuranceEnabled, isSalaryClient);
-
-        return loanOfferDTO;
-    }
-
-    private Double getAnnuityPayment(Double rate, Double requestedAmount, Integer term) {
-
-        Double interestRate = rate * 0.01 / 12;
-        return requestedAmount * (interestRate + interestRate / (pow(1 + interestRate, term) - 1));
-    }
-
-    public List<Double> getBaseRateAndInsurance() throws IOException {
-        //0 - base rate, 1 - insurance
-        FileInputStream file;
-        Properties properties = new Properties();
-        try {
-            file = new FileInputStream("src/main/resources/config.properties");
-            properties.load(file);
-            Double baseRate = Double.parseDouble(properties.getProperty("base.rate"));
-            Double insurance = Double.parseDouble(properties.getProperty("insurance"));
-            file.close();
-            return new ArrayList<Double>() {
-                {
-                    add(baseRate);
-                    add(insurance);
-                }
-            };
-        } catch (IOException e) {
-            throw new IOException("File not found or request for file is invalid");
-        }
-    }
-
-    private Double scoringRate(Double rate, ScoringDataDTO scoringDataDTO) {
-
-        rate += ScoringRulesRate.getEmploymentStatus(scoringDataDTO.getEmployment().getEmploymentStatus());
-        rate += ScoringRulesRate.getPosition(scoringDataDTO.getEmployment().getPosition());
-        rate += ScoringRulesRate.getMaritalStatus(scoringDataDTO.getMaritalStatus());
-        rate += ScoringRulesRate.getDependentAmount(scoringDataDTO.getDependentAmount());
-        rate += ScoringRulesRate.getGender(scoringDataDTO.getGender(), scoringDataDTO.getBirthdate());
-        return rate;
+        return creditDTO;
     }
 }

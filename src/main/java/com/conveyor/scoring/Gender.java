@@ -1,7 +1,8 @@
 package com.conveyor.scoring;
 
 public enum Gender {
-    WOMEN,
-    MEN,
-    OTHER
+    WOMAN,
+    MAN,
+    OTHER,
+    INCORRECT_GENDER
 }
