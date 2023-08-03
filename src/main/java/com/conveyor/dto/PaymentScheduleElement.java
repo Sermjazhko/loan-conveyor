@@ -13,16 +13,16 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "График ежемесячных платежей")
+@Schema(description = "Monthly payment schedule")
 public class PaymentScheduleElement {
     private Integer number;
     private LocalDate date;
     private BigDecimal totalPayment;
-    @Schema(description = "Выплата процентов")
+    @Schema(description = "Interest payment")
     private BigDecimal interestPayment;
-    @Schema(description = "Выплата долга")
+    @Schema(description = "Debt repayment")
     private BigDecimal debtPayment;
-    @Schema(description = "Остаток задолженности")
+    @Schema(description = "Outstanding balance")
     private BigDecimal remainingDebt;
 
     @Override
