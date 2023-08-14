@@ -1,8 +1,9 @@
 package com.conveyor.scoring;
 
 public enum Position {
-    MANAGER,
+    WORKER,
     MIDDLE_MANAGER,
     TOP_MANAGER,
+    OWNER,
     INCORRECT_POSITION
 }

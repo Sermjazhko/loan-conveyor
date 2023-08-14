@@ -32,7 +32,7 @@ class ScoringServiceTest {
 
     @Test
     void testGetEmploymentStatusWhenBUSINESS_thenReturn1() {
-        BigDecimal rate = scoringService.getEmploymentStatus(EmploymentStatus.BUSINESS);
+        BigDecimal rate = scoringService.getEmploymentStatus(EmploymentStatus.BUSINESS_OWNER);
         assertEquals(rate, new BigDecimal("3"));
     }
 
@@ -48,7 +48,7 @@ class ScoringServiceTest {
 
     @Test
     void testGetPositionWhenMANAGER_thenReturn0() {
-        BigDecimal rate = scoringService.getPosition(Position.MANAGER);
+        BigDecimal rate = scoringService.getPosition(Position.WORKER);
         assertEquals(rate, new BigDecimal("0"));
     }
 
@@ -81,7 +81,7 @@ class ScoringServiceTest {
 
     @Test
     void testGetMaritalStatusWhenNOT_MARRIED_thenReturnMin1() {
-        BigDecimal rate = scoringService.getMaritalStatus(MaritalStatus.NOT_MARRIED);
+        BigDecimal rate = scoringService.getMaritalStatus(MaritalStatus.DIVORCED);
         assertEquals(rate, new BigDecimal("-1"));
     }
 
@@ -114,7 +114,7 @@ class ScoringServiceTest {
     void testGetGenderWhenSuitableWOMAN_thenReturnMin3(int years) {
         LocalDate birthday = LocalDate.of(years, 1, 1);
 
-        BigDecimal rate = scoringService.getGender(Gender.WOMAN, birthday);
+        BigDecimal rate = scoringService.getGender(Gender.FEMALE, birthday);
         assertEquals(rate, new BigDecimal("-3"));
     }
 
@@ -123,7 +123,7 @@ class ScoringServiceTest {
     void testGetGenderWhenUnsuitableWOMAN_thenReturn0(int years) {
         LocalDate birthday = LocalDate.of(years, 1, 1);
 
-        BigDecimal rate = scoringService.getGender(Gender.WOMAN, birthday);
+        BigDecimal rate = scoringService.getGender(Gender.FEMALE, birthday);
         assertEquals(rate, new BigDecimal("0"));
     }
 
@@ -132,7 +132,7 @@ class ScoringServiceTest {
     void testGetGenderWhenSuitableMAN_thenReturnMin3(int years) {
         LocalDate birthday = LocalDate.of(years, 1, 1);
 
-        BigDecimal rate = scoringService.getGender(Gender.MAN, birthday);
+        BigDecimal rate = scoringService.getGender(Gender.MALE, birthday);
         assertEquals(rate, new BigDecimal("-3"));
     }
 
@@ -141,7 +141,7 @@ class ScoringServiceTest {
     void testGetGenderWhenUnsuitableMAN_thenReturn0(int years) {
         LocalDate birthday = LocalDate.of(years, 1, 1);
 
-        BigDecimal rate = scoringService.getGender(Gender.MAN, birthday);
+        BigDecimal rate = scoringService.getGender(Gender.MALE, birthday);
         assertEquals(rate, new BigDecimal("0"));
     }
 
@@ -149,7 +149,7 @@ class ScoringServiceTest {
     void testGetGenderWhenOTHER_thenReturn3() {
         LocalDate birthday = LocalDate.of(2000, 1, 1);
 
-        BigDecimal rate = scoringService.getGender(Gender.OTHER, birthday);
+        BigDecimal rate = scoringService.getGender(Gender.NOT_BINARY, birthday);
         assertEquals(rate, new BigDecimal("3"));
     }
 
@@ -237,7 +237,7 @@ class ScoringServiceTest {
         scoringDataDTO.setEmployment(employmentDTO);
         scoringDataDTO.setBirthdate(birthday);
         scoringDataDTO.setMaritalStatus(MaritalStatus.MARRIED); // -3
-        scoringDataDTO.setGender(Gender.MAN); // 0
+        scoringDataDTO.setGender(Gender.MALE); // 0
         scoringDataDTO.setDependentAmount(1); //0
 
         BigDecimal result = scoringService.scoringRate(rate, scoringDataDTO);

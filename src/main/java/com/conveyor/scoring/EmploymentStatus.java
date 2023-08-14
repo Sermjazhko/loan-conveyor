@@ -3,6 +3,6 @@ package com.conveyor.scoring;
 public enum EmploymentStatus {
     UNEMPLOYED,
     SELF_EMPLOYED,
-    BUSINESS,
+    BUSINESS_OWNER,
     INCORRECT_EMPLOYMENT_STATUS
 }
