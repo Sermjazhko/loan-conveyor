@@ -30,7 +30,7 @@ public class ScoringService {
             case SELF_EMPLOYED:
                 rate = BigDecimal.valueOf(1);
                 break;
-            case BUSINESS:
+            case BUSINESS_OWNER:
                 rate = BigDecimal.valueOf(3);
                 break;
             default:
@@ -45,7 +45,8 @@ public class ScoringService {
         BigDecimal rate;
 
         switch (position) {
-            case MANAGER:
+            case WORKER:
+            case OWNER:
                 rate = BigDecimal.valueOf(0);
                 break;
             case MIDDLE_MANAGER:
@@ -69,8 +70,12 @@ public class ScoringService {
             case MARRIED:
                 rate = BigDecimal.valueOf(-3);
                 break;
-            case NOT_MARRIED:
+            case DIVORCED:
                 rate = BigDecimal.valueOf(-1);
+                break;
+            case SINGLE:
+            case WIDOW_WIDOWER:
+                rate = BigDecimal.valueOf(0);
                 break;
             default:
                 throw new IllegalArgumentException("Incorrect marital status");
@@ -96,17 +101,17 @@ public class ScoringService {
         BigDecimal rate = BigDecimal.valueOf(0);
 
         switch (gender) {
-            case WOMAN:
+            case FEMALE:
                 if (34 < years && years < 61) {
                     rate = BigDecimal.valueOf(-3);
                 }
                 break;
-            case MAN:
+            case MALE:
                 if (29 < years && years < 56) {
                     rate = BigDecimal.valueOf(-3);
                 }
                 break;
-            case OTHER:
+            case NOT_BINARY:
                 rate = BigDecimal.valueOf(3);
                 break;
             default:
