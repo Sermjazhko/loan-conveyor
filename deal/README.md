@@ -81,11 +81,20 @@
 ![image](https://github.com/Sermjazhko/dealMVP/assets/43463670/b98e9467-d081-4522-bd03-765ee78be364)
 
 
-Результат (моя вольность, в задании этого нет...): 
+Результат^
 
 Обновляется в заявке id кредита:
 
 ![image](https://github.com/Sermjazhko/dealMVP/assets/43463670/81b7f89c-823f-47a6-aff0-8cb281808699)
+
+Обновляются данные о клиенте:
+
+![image](https://github.com/Sermjazhko/loan-conveyor/assets/43463670/140517f5-7ae1-4039-a667-2f50a79c3d1d)
+
+Обновляется статус заявки и история: 
+
+![image](https://github.com/Sermjazhko/loan-conveyor/assets/43463670/80c61069-bdec-4f1c-86d0-7346ed64195a)
+![image](https://github.com/Sermjazhko/loan-conveyor/assets/43463670/86e141e8-59fb-4e38-b40b-ed0ae9eb5a37)
 
 
 Появляется кредит в БД: 
