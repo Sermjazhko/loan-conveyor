@@ -146,7 +146,8 @@ public class DealController {
             // принятое предложение LoanOfferDTO устанавливается в поле appliedOffer.
 
             Date date = new Date();
-            application = applicationService.updateApplicationStatusHistory(application, date);
+            application = applicationService.updateApplicationStatusHistory(application, date,
+                    ApplicationStatus.APPROVED);
 
             Jsonb jsonb = JsonbBuilder.create();
             String resultOffer = jsonb.toJson(loanOfferDTO);
@@ -189,7 +190,27 @@ public class DealController {
 
             //ScoringDataDTO насыщается информацией из FinishRegistrationRequestDTO и Client, который хранится в Application
             Client client = clientService.getClientById(application.getClientId());
+
+
+            //обновляем клиента
+            client.setGender(finishRegistrationRequestDTO.getGender());
+            client.setMaritalStatus(finishRegistrationRequestDTO.getMaritalStatus());
+            client.setDependentAmount(finishRegistrationRequestDTO.getDependentAmount());
             log.info("client: " + client);
+
+            clientService.addClientToDB(client);
+            log.info("Client update!");
+
+            //обновим историю статусов
+            Date date = new Date();
+            application = applicationService.updateApplicationStatusHistory(application, date,
+                    ApplicationStatus.CC_APPROVED);
+
+            log.info("Application: " + application);
+
+            applicationService.addApplicationToDB(application);
+            log.info("Application update!");
+
 
             ScoringDataDTO scoringDataDTO = creditService.createScoringData(finishRegistrationRequestDTO,
                     client);

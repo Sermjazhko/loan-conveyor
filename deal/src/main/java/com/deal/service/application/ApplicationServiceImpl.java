@@ -63,14 +63,15 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
-    public Application updateApplicationStatusHistory(Application application, Date date) {
+    public Application updateApplicationStatusHistory(Application application, Date date,
+                                                      ApplicationStatus applicationStatus) {
         Jsonb jsonb = JsonbBuilder.create();
         List<StatusHistory> list =
                 jsonb.fromJson(application.getStatusHistory(), List.class);
         log.info("Status History: " + list);
 
-        application.setApplicationStatus(ApplicationStatus.APPROVED);
-        String resultListHistory = createStatusHistory(list, ApplicationStatus.APPROVED,
+        application.setApplicationStatus(applicationStatus);
+        String resultListHistory = createStatusHistory(list, applicationStatus,
                 ChangeType.AUTOMATIC, date);
         log.info("list history status: " + resultListHistory);
 

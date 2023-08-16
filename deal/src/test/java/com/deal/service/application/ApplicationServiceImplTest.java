@@ -4,7 +4,6 @@ import com.deal.entities.ApplicationStatus;
 import com.deal.entities.ChangeType;
 import com.deal.model.Application;
 import com.deal.model.StatusHistory;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -110,7 +109,7 @@ class ApplicationServiceImplTest {
                 .statusHistory(strStatusHistory)
                 .build();
 
-        application = applicationService.updateApplicationStatusHistory(application, date);
+        application = applicationService.updateApplicationStatusHistory(application, date, ApplicationStatus.APPROVED);
 
         String realStatus = "[{\"date\":" + dateJsonb + "," +
                 "\"changeType\":\"AUTOMATIC\",\"status\":\"APPROVED\"}," +
@@ -119,9 +118,9 @@ class ApplicationServiceImplTest {
 
         assertEquals(application.getStatusHistory(), realStatus);
     }
-
+/*
     @AfterEach
     public void resetDb() {
         applicationRepository.deleteAll();
-    }
+    }*/
 }

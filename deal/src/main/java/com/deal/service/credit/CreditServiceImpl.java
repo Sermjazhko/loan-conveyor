@@ -69,7 +69,7 @@ public class CreditServiceImpl implements CreditService {
                 .paymentSchedule(paymentScheduleJsonb)
                 .insuranceEnable(creditDTO.getIsInsuranceEnabled())
                 .salaryClient(creditDTO.getIsSalaryClient())
-                .creditStatus(CreditStatus.ISSUED)
+                .creditStatus(CreditStatus.CALCULATE)
                 .build();
     }
 }

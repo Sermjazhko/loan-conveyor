@@ -36,7 +36,6 @@ class CreditServiceImplTest {
     @Autowired
     private CreditRepository creditRepository;
 
-
     @Test
     public void testAddAndGetCredit() {
         //первые два метода
@@ -138,7 +137,7 @@ class CreditServiceImplTest {
 
         Credit credit = creditService.createCredit(creditDTO);
 
-        assertEquals(credit.getCreditStatus(), CreditStatus.ISSUED);
+        assertEquals(credit.getCreditStatus(), CreditStatus.CALCULATE);
         assertEquals(credit.getAmount(), new BigDecimal("12000"));
         assertEquals(credit.getTerm().longValue(), 12);
         assertEquals(credit.getInsuranceEnable(), true);
@@ -148,4 +147,9 @@ class CreditServiceImplTest {
         assertEquals(credit.getRate(), new BigDecimal("12"));
         assertEquals(credit.getPsk(), new BigDecimal("3.4"));
     }
+/*
+    @AfterEach
+    public void resetDb() {
+        creditRepository.deleteAll();
+    }*/
 }

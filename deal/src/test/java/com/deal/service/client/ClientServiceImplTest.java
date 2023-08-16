@@ -3,7 +3,6 @@ package com.deal.service.client;
 import com.deal.dto.LoanApplicationRequestDTO;
 import com.deal.entities.Gender;
 import com.deal.model.Client;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -102,9 +101,9 @@ class ClientServiceImplTest {
         assertEquals("0000", client.getAccount());
     }
 
-
+/*
     @AfterEach
     public void resetDb() {
         clientRepository.deleteAll();
-    }
+    }*/
 }

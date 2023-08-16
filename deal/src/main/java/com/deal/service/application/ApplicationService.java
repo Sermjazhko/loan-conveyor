@@ -18,5 +18,6 @@ public interface ApplicationService {
     String createStatusHistory(List list, ApplicationStatus applicationStatus, ChangeType changeType,
                                Date date);
 
-    Application updateApplicationStatusHistory(Application application, Date date);
+    Application updateApplicationStatusHistory(Application application, Date date,
+                                               ApplicationStatus applicationStatus);
 }
