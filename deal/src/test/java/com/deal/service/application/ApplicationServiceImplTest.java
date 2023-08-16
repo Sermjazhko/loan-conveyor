@@ -47,6 +47,8 @@ class ApplicationServiceImplTest {
         assertEquals(testApplication.getId(), id);
         assertEquals(testApplication.getApplicationStatus(), ApplicationStatus.APPROVED);
         assertEquals(testApplication.getSesCode(), "OK");
+
+        applicationRepository.deleteById(id);
     }
 
     @Test
@@ -118,9 +120,4 @@ class ApplicationServiceImplTest {
 
         assertEquals(application.getStatusHistory(), realStatus);
     }
-/*
-    @AfterEach
-    public void resetDb() {
-        applicationRepository.deleteAll();
-    }*/
 }

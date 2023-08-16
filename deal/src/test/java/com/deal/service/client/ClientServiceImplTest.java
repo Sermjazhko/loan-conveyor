@@ -50,6 +50,8 @@ class ClientServiceImplTest {
         assertEquals(testClient.getDependentAmount().intValue(), 2);
         assertEquals(testClient.getGender(), Gender.MALE);
         assertEquals(testClient.getPassport(), "{\"number\": 2000}");
+
+        clientRepository.deleteById(id);
     }
 
     @Test
@@ -100,10 +102,4 @@ class ClientServiceImplTest {
         assertEquals("sel@mail.ru", client.getEmail());
         assertEquals("0000", client.getAccount());
     }
-
-/*
-    @AfterEach
-    public void resetDb() {
-        clientRepository.deleteAll();
-    }*/
 }

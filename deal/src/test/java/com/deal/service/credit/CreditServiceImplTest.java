@@ -64,6 +64,8 @@ class CreditServiceImplTest {
         assertEquals(testCredit.getMonthlyPayment(), new BigDecimal("1211"));
         assertEquals(testCredit.getRate(), new BigDecimal("12"));
         assertEquals(testCredit.getPsk(), new BigDecimal("3.4"));
+
+        creditRepository.deleteById(id);
     }
 
     @Test
