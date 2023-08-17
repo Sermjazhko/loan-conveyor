@@ -1,8 +1,8 @@
 package com.deal.controller;
 
 import com.deal.dto.*;
-import com.deal.entities.ApplicationStatus;
-import com.deal.entities.ChangeType;
+import com.deal.enums.ApplicationStatus;
+import com.deal.enums.ChangeType;
 import com.deal.model.Application;
 import com.deal.model.Client;
 import com.deal.model.Credit;
@@ -59,20 +59,13 @@ public class DealController {
                                                            @Parameter(description = "Заявка на получение кредита")
                                                                    LoanApplicationRequestDTO loanApplicationRequestDTO) {
         try {
-            /**
-             * видимо, в любом случае создаем заявку... даже полупустую...
-             * как на основании loan application request можно построить employment?
-             * паспорт неполный и инфа для клиента, оставляю пока нулевые
-             */
             //На основе LoanApplicationRequestDTO создаётся сущность Client и сохраняется в БД.
             log.info("Loan application request: " + loanApplicationRequestDTO);
 
             String resultPassport = clientService.createPassport(loanApplicationRequestDTO);
-            String resultEmployment = clientService.createEmployment(loanApplicationRequestDTO);
             log.info("Result jsonb passport: " + resultPassport);
-            log.info("Result jsonb employment: " + resultEmployment);
 
-            Client client = clientService.createClient(loanApplicationRequestDTO, resultPassport, resultEmployment);
+            Client client = clientService.createClient(loanApplicationRequestDTO, resultPassport);
             log.info("Client: " + client);
 
             clientService.addClientToDB(client);
@@ -109,10 +102,10 @@ public class DealController {
             log.info("End POST request!");
 
             List<LoanOfferDTO> loanOfferDTOS = rateResponse.getBody();
-            loanOfferDTOS.get(0).setApplicationId(application.getId());
-            loanOfferDTOS.get(1).setApplicationId(application.getId());
-            loanOfferDTOS.get(2).setApplicationId(application.getId());
-            loanOfferDTOS.get(3).setApplicationId(application.getId());
+
+            for (int index = 0; index < 4; ++index) {
+                loanOfferDTOS.get(index).setApplicationId(application.getId());
+            }
 
             log.info("loanOffer: " + loanOfferDTOS);
 
@@ -175,12 +168,6 @@ public class DealController {
     public void putCalculate(@RequestBody FinishRegistrationRequestDTO finishRegistrationRequestDTO,
                              @PathVariable(value = "applicationId") Long applicationId) {
         try {
-            /**
-             * может, тут надо хотя бы кредит создать???
-             * зачем ещё этот метод? Нам просто что-то приходит и... Мы ничего не делаем
-             * не добавляем/не выводим, просто принимаем данные, отправляем пост запрос
-             * на выходе с запроса получаем дто и.. всё... зачем получали?
-             */
             //По API приходит объект FinishRegistrationRequestDTO и параметр applicationId (Long).
             //Достаётся из БД заявка(Application) по applicationId.
             log.info("Input data to the calculation, Finish registration request: " + finishRegistrationRequestDTO);
@@ -191,11 +178,14 @@ public class DealController {
             //ScoringDataDTO насыщается информацией из FinishRegistrationRequestDTO и Client, который хранится в Application
             Client client = clientService.getClientById(application.getClientId());
 
-
+            Jsonb jsonb = JsonbBuilder.create();
+            String strEmployment = jsonb.toJson(finishRegistrationRequestDTO.getEmployment());
             //обновляем клиента
             client.setGender(finishRegistrationRequestDTO.getGender());
             client.setMaritalStatus(finishRegistrationRequestDTO.getMaritalStatus());
             client.setDependentAmount(finishRegistrationRequestDTO.getDependentAmount());
+            client.setEmployment(strEmployment);
+            client.setAccount(finishRegistrationRequestDTO.getAccount());
             log.info("client: " + client);
 
             clientService.addClientToDB(client);
@@ -213,7 +203,7 @@ public class DealController {
 
 
             ScoringDataDTO scoringDataDTO = creditService.createScoringData(finishRegistrationRequestDTO,
-                    client);
+                    client, application);
             log.info("Scoring data: " + scoringDataDTO);
 
             String resourceUrl = "http://localhost:9090/conveyor/calculation";
@@ -229,7 +219,6 @@ public class DealController {
                             });
             log.info("End POST request. Credit dto: " + creditResponse);
 
-            //создала и добавила кредит просто на всякий случай, само задание у меня отображается без этого
             Credit credit = creditService.createCredit(creditResponse.getBody());
             log.info("Credit: " + credit);
 

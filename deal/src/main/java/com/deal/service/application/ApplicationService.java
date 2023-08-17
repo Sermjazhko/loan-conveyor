@@ -1,7 +1,7 @@
 package com.deal.service.application;
 
-import com.deal.entities.ApplicationStatus;
-import com.deal.entities.ChangeType;
+import com.deal.enums.ApplicationStatus;
+import com.deal.enums.ChangeType;
 import com.deal.model.Application;
 
 import java.util.Date;

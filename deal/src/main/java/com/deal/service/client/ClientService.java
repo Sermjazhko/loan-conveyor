@@ -10,9 +10,8 @@ public interface ClientService {
     Client getClientById(Long id);
 
     String createPassport(LoanApplicationRequestDTO loanApplicationRequestDTO);
+/*
+    String createEmployment(LoanApplicationRequestDTO loanApplicationRequestDTO);*/
 
-    String createEmployment(LoanApplicationRequestDTO loanApplicationRequestDTO);
-
-    Client createClient(LoanApplicationRequestDTO loanApplicationRequestDTO, String passport,
-                        String employment);
+    Client createClient(LoanApplicationRequestDTO loanApplicationRequestDTO, String passport);
 }

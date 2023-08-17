@@ -1,6 +1,6 @@
 package com.deal.model;
 
-import com.deal.entities.ApplicationStatus;
+import com.deal.enums.ApplicationStatus;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;

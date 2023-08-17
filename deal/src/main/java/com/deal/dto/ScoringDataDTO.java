@@ -1,7 +1,7 @@
 package com.deal.dto;
 
-import com.deal.entities.Gender;
-import com.deal.entities.MaritalStatus;
+import com.deal.enums.Gender;
+import com.deal.enums.MaritalStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 

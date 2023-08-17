@@ -1,7 +1,7 @@
 package com.deal.dto;
 
-import com.deal.entities.EmploymentStatus;
-import com.deal.entities.Position;
+import com.deal.enums.EmploymentStatus;
+import com.deal.enums.Position;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 

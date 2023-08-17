@@ -1,7 +1,7 @@
 package com.deal.model;
 
-import com.deal.entities.ApplicationStatus;
-import com.deal.entities.ChangeType;
+import com.deal.enums.ApplicationStatus;
+import com.deal.enums.ChangeType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
