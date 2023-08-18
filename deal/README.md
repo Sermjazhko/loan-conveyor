@@ -1,6 +1,6 @@
-# dealMVP
+# deal
 
-# dealMVP
+# deal
 
 <h1>Сущности для базы данных</h1>
 
