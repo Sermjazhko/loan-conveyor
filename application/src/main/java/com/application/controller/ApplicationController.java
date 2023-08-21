@@ -29,7 +29,7 @@ public class ApplicationController {
             summary = "Prescoring + request for calculation of possible loan terms.",
             description = "The API sends a Loan Application Request TO" +
                     "Based on LoanApplicationRequestDTO, prescoring occurs." +
-                    "A POST request is sent to /deal/application in MS deal via FeignClient." +
+                    "A POST request is sent to /deal/application in MS deal via RestTemplate." +
                     "The response to the API is a list of 4 LoanOfferDTO from worst to best."
     )
     @PostMapping("")
