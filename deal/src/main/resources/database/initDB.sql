@@ -31,8 +31,8 @@ CREATE TABLE IF NOT EXISTS credit (
 
 CREATE TABLE IF NOT EXISTS application (
                                            application_id BIGSERIAL,
-                                           client_id integer,
-                                           credit_id integer,
+                                           client_id BIGSERIAL,
+                                           credit_id BIGSERIAL,
                                            status varchar,
                                            creation_date timestamp,
                                            applied_offer jsonb,

@@ -25,7 +25,6 @@ public class ApplicationController {
 
     private static Logger log = Logger.getLogger(ApplicationController.class.getName());
 
-
     @Operation(
             summary = "Prescoring + request for calculation of possible loan terms.",
             description = "The API sends a Loan Application Request TO" +
@@ -74,7 +73,6 @@ public class ApplicationController {
     @PutMapping("/offer")
     public void getPostCalculation(@RequestBody @Parameter(description = "loan offer")
                                                             LoanOfferDTO loanOfferDTO) {
-
         try {
             log.info("Input data to the calculation, loan offer DTO: " + loanOfferDTO);
 

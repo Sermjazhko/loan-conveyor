@@ -79,6 +79,7 @@ public class DealController {
             log.info("Result jsonb list history: " + resultHistory);
 
             Application application = applicationService.createApplication(client.getId(), resultHistory);
+
             log.info("Application: " + application);
 
             applicationService.addApplicationToDB(application);
