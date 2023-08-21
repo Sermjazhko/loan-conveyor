@@ -27,9 +27,9 @@ public class ApplicationController {
 
     @Operation(
             summary = "Prescoring + request for calculation of possible loan terms.",
-            description = "The API sends a Loan Application Request TO" +
-                    "Based on LoanApplicationRequestDTO, prescoring occurs." +
-                    "A POST request is sent to /deal/application in MS deal via RestTemplate." +
+            description = "The API sends a LoanApplicationRequestDTO\n" +
+                    "Based on LoanApplicationRequestDTO, prescoring occurs.\n" +
+                    "A POST request is sent to /deal/application in MS deal via RestTemplate.\n" +
                     "The response to the API is a list of 4 LoanOfferDTO from worst to best."
     )
     @PostMapping("")
@@ -67,7 +67,7 @@ public class ApplicationController {
 
     @Operation(
             summary = "Choosing one of the offers",
-            description = "LoanOfferDTO comes via API" +
+            description = "LoanOfferDTO comes via API.\n" +
                     "A PUT request is sent to /deal/offer in MS deal via RestTemplate."
     )
     @PutMapping("/offer")
