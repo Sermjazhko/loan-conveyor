@@ -1,5 +1,4 @@
 # application
-<h1 align="center"> Кредитный конвейер </h1>
 <h2 align="center"> MVP Level 3. Перенос прескоринга в МС-application </h2>
 
 <h3> Прескоринг </h3>
