@@ -1,4 +1,4 @@
-package com.application.service.Impl;
+package com.application.service;
 
 import com.application.dto.LoanApplicationRequestDTO;
 import com.application.dto.LoanOfferDTO;
@@ -16,13 +16,13 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 
 @ExtendWith(MockitoExtension.class)
-class RequestServiceImplTest {
+class DealResponseServiceTest {
 
     @Mock
     private RestTemplate restTemplate;
 
     @InjectMocks
-    private RequestServiceImpl requestService;
+    private DealResponseService dealResponseService;
 
     @Test
     void testGetResultPostRequestOffer() {
@@ -43,7 +43,7 @@ class RequestServiceImplTest {
         Mockito.when(restTemplate.postForObject(any(String.class), any(Object.class), any(Class.class))).
                 thenReturn(listLoan);
 
-        List<LoanOfferDTO> list = requestService.getResultPostRequestOffer(new LoanApplicationRequestDTO());
+        List<LoanOfferDTO> list = dealResponseService.getResultPostRequestOffer(new LoanApplicationRequestDTO());
 
         Mockito.verify(restTemplate, Mockito.times(1)).
                 postForObject(any(String.class), any(Object.class), any(Class.class));
@@ -56,7 +56,7 @@ class RequestServiceImplTest {
 
     @Test
     void testGetResultPutRequestCalculation() {
-        requestService.getResultPutRequestCalculation(new LoanOfferDTO());
+        dealResponseService.getResultPutRequestCalculation(new LoanOfferDTO());
         Mockito.verify(restTemplate, Mockito.times(1)).put(any(String.class), any(Object.class));
     }
 }

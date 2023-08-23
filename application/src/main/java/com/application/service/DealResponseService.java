@@ -1,10 +1,8 @@
-package com.application.service.Impl;
+package com.application.service;
 
 import com.application.dto.LoanApplicationRequestDTO;
 import com.application.dto.LoanOfferDTO;
-import com.application.service.RequestService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -14,22 +12,25 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class RequestServiceImpl implements RequestService {
+public class DealResponseService {
 
-    @Autowired
-    private RestTemplate restTemplate;
+    private final RestTemplate restTemplate;
 
-    @Value("${deal.application.url}")
-    private String URL_DEAL_APPLICATION = "";
+    @Value("${integration.deal.url}")
+    private String URL_DEAL;
 
-    @Value("${deal.offer.url}")
-    private String URL_DEAL_OFFER = "";
+    private static final String URL_DEAL_APPLICATION = "/deal/application";
 
-    @Override
+    private static final String URL_DEAL_OFFER = "/deal/offer";
+
+    public DealResponseService(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
+
     public List<LoanOfferDTO> getResultPostRequestOffer(LoanApplicationRequestDTO loanApplicationRequestDTO) {
 
-        log.info("Start POST request!" + URL_DEAL_APPLICATION);
-        LoanOfferDTO[] rateResponse = restTemplate.postForObject(URL_DEAL_APPLICATION,
+        log.info("Start POST request!" + URL_DEAL + URL_DEAL_APPLICATION);
+        LoanOfferDTO[] rateResponse = restTemplate.postForObject(URL_DEAL + URL_DEAL_APPLICATION,
                 loanApplicationRequestDTO, LoanOfferDTO[].class);
         log.info("End POST request!");
 
@@ -38,11 +39,10 @@ public class RequestServiceImpl implements RequestService {
         return loanOfferDTOS;
     }
 
-    @Override
     public boolean getResultPutRequestCalculation(LoanOfferDTO loanOfferDTO) {
 
-        log.info("Start PUT request!" + URL_DEAL_OFFER);
-        restTemplate.put(URL_DEAL_OFFER, loanOfferDTO);
+        log.info("Start PUT request!" + URL_DEAL + URL_DEAL_OFFER);
+        restTemplate.put(URL_DEAL + URL_DEAL_OFFER, loanOfferDTO);
         log.info("End PUT request!");
 
         return true;

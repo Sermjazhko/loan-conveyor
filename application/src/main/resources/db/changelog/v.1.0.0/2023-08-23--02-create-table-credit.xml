@@ -4,7 +4,7 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
 
-    <changeSet id="2023-08-23--02-create-table-credit" author="SEA">
+    <changeSet id="2023-08-23--02-create-table-credit" author="esermyazhko">
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="credit"/>

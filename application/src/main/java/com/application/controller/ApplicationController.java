@@ -2,7 +2,7 @@ package com.application.controller;
 
 import com.application.dto.LoanApplicationRequestDTO;
 import com.application.dto.LoanOfferDTO;
-import com.application.service.RequestService;
+import com.application.service.DealResponseService;
 import com.application.validation.Prescoring;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -19,10 +19,10 @@ import java.util.List;
 @RequestMapping("/application")
 public class ApplicationController {
 
-    private final RequestService requestService;
+    private final DealResponseService dealResponseService;
 
-    public ApplicationController(RequestService requestService) {
-        this.requestService = requestService;
+    public ApplicationController(DealResponseService dealResponseService) {
+        this.dealResponseService = dealResponseService;
     }
 
     @Operation(
@@ -37,7 +37,7 @@ public class ApplicationController {
         log.info("Input data to the offer, Loan Application Request: " + loanApplicationRequestDTO);
 
         Prescoring.checkLoanApplicationRequestDTO(loanApplicationRequestDTO);
-        List<LoanOfferDTO> loanOfferDTOS = requestService.getResultPostRequestOffer(loanApplicationRequestDTO);
+        List<LoanOfferDTO> loanOfferDTOS = dealResponseService.getResultPostRequestOffer(loanApplicationRequestDTO);
 
         log.info("Output data to the offer, list Loan Offer: " + loanOfferDTOS);
         return loanOfferDTOS;
@@ -51,6 +51,6 @@ public class ApplicationController {
     public void getPutCalculation(@RequestBody @Parameter(description = "loan offer")
                                           LoanOfferDTO loanOfferDTO) {
         log.info("Input data to the calculation, loan offer DTO: " + loanOfferDTO);
-        requestService.getResultPutRequestCalculation(loanOfferDTO);
+        dealResponseService.getResultPutRequestCalculation(loanOfferDTO);
     }
 }
