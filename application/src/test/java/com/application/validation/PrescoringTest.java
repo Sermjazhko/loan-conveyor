@@ -32,13 +32,13 @@ class PrescoringTest {
     }
 
     @Test
-    void testCheckDate() {
+    void testCheckDateValid() {
         LocalDate localDate = LocalDate.of(2000, 01, 01);
         assertTrue(Prescoring.isValidDate(localDate));
     }
 
     @Test
-    void testCheckLoanApplicationRequestDTOWhenIncorrectAmount_thenReturnTrow() {
+    void testCheckLoanApplicationRequestDTOWhenIncorrectAmountNull_thenReturnTrow() {
         Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
                     LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
                             .term(10)
@@ -54,7 +54,10 @@ class PrescoringTest {
                 }
         );
         assertEquals("Amount cannot be null", exception.getMessage());
+    }
 
+    @Test
+    void testCheckLoanApplicationRequestDTOWhenIncorrectAmountLess_thenReturnTrow() {
         Throwable exception2 = assertThrows(IllegalArgumentException.class, () -> {
                     LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
                             .amount(new BigDecimal("9999"))
@@ -75,7 +78,7 @@ class PrescoringTest {
 
 
     @Test
-    void testCheckLoanApplicationRequestDTOWhenIncorrectTerm_thenReturnTrow() {
+    void testCheckLoanApplicationRequestDTOWhenIncorrectTermNull_thenReturnTrow() {
         Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
                     LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
                             .amount(new BigDecimal("10000"))
@@ -91,7 +94,10 @@ class PrescoringTest {
                 }
         );
         assertEquals("Term cannot be null", exception.getMessage());
+    }
 
+    @Test
+    void testCheckLoanApplicationRequestDTOWhenIncorrectTermLess_thenReturnTrow() {
         Throwable exception2 = assertThrows(IllegalArgumentException.class, () -> {
                     LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
                             .amount(new BigDecimal("10000"))

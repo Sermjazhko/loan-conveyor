@@ -10,6 +10,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.client.RestTemplate;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -29,10 +30,20 @@ class DealResponseServiceTest {
         LoanOfferDTO loanOfferDTO1 = LoanOfferDTO.builder()
                 .applicationId(1L)
                 .term(12)
+                .rate(new BigDecimal("10.0"))
+                .requestedAmount(new BigDecimal("10000.00"))
+                .isInsuranceEnabled(true)
+                .isSalaryClient(false)
+                .monthlyPayment(new BigDecimal("1000.00"))
                 .build();
         LoanOfferDTO loanOfferDTO2 = LoanOfferDTO.builder()
                 .applicationId(2L)
                 .term(10)
+                .rate(new BigDecimal("12.0"))
+                .requestedAmount(new BigDecimal("12000.00"))
+                .isInsuranceEnabled(false)
+                .isSalaryClient(true)
+                .monthlyPayment(new BigDecimal("1200.00"))
                 .build();
 
 
@@ -48,10 +59,8 @@ class DealResponseServiceTest {
         Mockito.verify(restTemplate, Mockito.times(1)).
                 postForObject(any(String.class), any(Object.class), any(Class.class));
 
-        assertEquals(loanOfferDTO1.getApplicationId(), list.get(0).getApplicationId());
-        assertEquals(loanOfferDTO2.getApplicationId(), list.get(1).getApplicationId());
-        assertEquals(loanOfferDTO1.getTerm(), list.get(0).getTerm());
-        assertEquals(loanOfferDTO2.getTerm(), list.get(1).getTerm());
+        assertEquals(loanOfferDTO1, list.get(0));
+        assertEquals(loanOfferDTO2, list.get(1));
     }
 
     @Test
