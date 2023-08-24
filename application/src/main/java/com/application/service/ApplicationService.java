@@ -12,7 +12,7 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class DealResponseService {
+public class ApplicationService {
 
     private final RestTemplate restTemplate;
 
@@ -23,11 +23,13 @@ public class DealResponseService {
 
     private static final String URL_DEAL_OFFER = "/deal/offer";
 
-    public DealResponseService(RestTemplate restTemplate) {
+    public ApplicationService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 
-    public List<LoanOfferDTO> getResultPostRequestOffer(LoanApplicationRequestDTO loanApplicationRequestDTO) {
+    public List<LoanOfferDTO> createLoanApplication(LoanApplicationRequestDTO loanApplicationRequestDTO) {
+
+        Prescoring.calculatePrescoring(loanApplicationRequestDTO);
 
         log.info("Start POST request!" + URL_DEAL + URL_DEAL_APPLICATION);
         LoanOfferDTO[] rateResponse = restTemplate.postForObject(URL_DEAL + URL_DEAL_APPLICATION,
@@ -39,7 +41,7 @@ public class DealResponseService {
         return loanOfferDTOS;
     }
 
-    public boolean getResultPutRequestCalculation(LoanOfferDTO loanOfferDTO) {
+    public boolean applyOffer(LoanOfferDTO loanOfferDTO) {
 
         log.info("Start PUT request!" + URL_DEAL + URL_DEAL_OFFER);
         restTemplate.put(URL_DEAL + URL_DEAL_OFFER, loanOfferDTO);

@@ -1,4 +1,4 @@
-package com.application.validation;
+package com.application.service;
 
 import com.application.dto.LoanApplicationRequestDTO;
 import org.junit.jupiter.api.Test;
@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class PrescoringTest {
 
     @Test
-    void testCheckDateWhenNull_returnTrow() {
+    void testWhenDateIsNull_returnTrow() {
         Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
                     Prescoring.isValidDate(null);
                 }
@@ -22,7 +22,7 @@ class PrescoringTest {
     }
 
     @Test
-    void testCheckDateWhenAgeLessThan18_returnTrow() {
+    void testWhenAgeLessThan18_returnTrow() {
         Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
                     LocalDate localDate = LocalDate.of(2006, 01, 01);
                     Prescoring.isValidDate(localDate);
@@ -32,13 +32,13 @@ class PrescoringTest {
     }
 
     @Test
-    void testCheckDate() {
+    void testIsDateValid() {
         LocalDate localDate = LocalDate.of(2000, 01, 01);
         assertTrue(Prescoring.isValidDate(localDate));
     }
 
     @Test
-    void testCheckLoanApplicationRequestDTOWhenIncorrectAmount_thenReturnTrow() {
+    void testWhenAmountIsNull_thenReturnTrow() {
         Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
                     LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
                             .term(10)
@@ -50,11 +50,14 @@ class PrescoringTest {
                             .passportSeries("1234")
                             .passportNumber("123456")
                             .build();
-                    Prescoring.checkLoanApplicationRequestDTO(loanApplicationRequestDTO);
+                    Prescoring.calculatePrescoring(loanApplicationRequestDTO);
                 }
         );
         assertEquals("Amount cannot be null", exception.getMessage());
+    }
 
+    @Test
+    void testWhenAmountLessPrescoringAmount_thenReturnTrow() {
         Throwable exception2 = assertThrows(IllegalArgumentException.class, () -> {
                     LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
                             .amount(new BigDecimal("9999"))
@@ -67,7 +70,7 @@ class PrescoringTest {
                             .passportSeries("1234")
                             .passportNumber("123456")
                             .build();
-                    Prescoring.checkLoanApplicationRequestDTO(loanApplicationRequestDTO);
+                    Prescoring.calculatePrescoring(loanApplicationRequestDTO);
                 }
         );
         assertEquals("Amount cannot be less 10 000", exception2.getMessage());
@@ -75,7 +78,7 @@ class PrescoringTest {
 
 
     @Test
-    void testCheckLoanApplicationRequestDTOWhenIncorrectTerm_thenReturnTrow() {
+    void testWhenTermIsNull_thenReturnTrow() {
         Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
                     LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
                             .amount(new BigDecimal("10000"))
@@ -87,11 +90,14 @@ class PrescoringTest {
                             .passportSeries("1234")
                             .passportNumber("123456")
                             .build();
-                    Prescoring.checkLoanApplicationRequestDTO(loanApplicationRequestDTO);
+                    Prescoring.calculatePrescoring(loanApplicationRequestDTO);
                 }
         );
         assertEquals("Term cannot be null", exception.getMessage());
+    }
 
+    @Test
+    void testWhenTermLessPrescoringTerm_thenReturnTrow() {
         Throwable exception2 = assertThrows(IllegalArgumentException.class, () -> {
                     LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
                             .amount(new BigDecimal("10000"))
@@ -104,14 +110,14 @@ class PrescoringTest {
                             .passportSeries("1234")
                             .passportNumber("123456")
                             .build();
-                    Prescoring.checkLoanApplicationRequestDTO(loanApplicationRequestDTO);
+                    Prescoring.calculatePrescoring(loanApplicationRequestDTO);
                 }
         );
         assertEquals("Term cannot be less 6", exception2.getMessage());
     }
 
     @Test
-    void testCheckLoanApplicationRequestDTOWhenFirstNameNull_thenReturnTrow() {
+    void testWhenFirstNameIsNull_thenReturnTrow() {
         Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
                     LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
                             .amount(new BigDecimal("10000"))
@@ -123,7 +129,7 @@ class PrescoringTest {
                             .passportSeries("1234")
                             .passportNumber("123456")
                             .build();
-                    Prescoring.checkLoanApplicationRequestDTO(loanApplicationRequestDTO);
+                    Prescoring.calculatePrescoring(loanApplicationRequestDTO);
                 }
         );
         assertEquals("First name cannot be null", exception.getMessage());
@@ -131,7 +137,7 @@ class PrescoringTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"F", "0123456789012345678901234567890"})
-    void testCheckLoanApplicationRequestDTOWhenIncorrectFirstName_thenReturnTrow(String str) {
+    void testWhenFirstNameIsIncorrect_thenReturnTrow(String str) {
         Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
                     LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
                             .amount(new BigDecimal("10000"))
@@ -144,7 +150,7 @@ class PrescoringTest {
                             .passportSeries("1234")
                             .passportNumber("123456")
                             .build();
-                    Prescoring.checkLoanApplicationRequestDTO(loanApplicationRequestDTO);
+                    Prescoring.calculatePrescoring(loanApplicationRequestDTO);
                 }
         );
         assertEquals("First name must be between 2 and 30 characters", exception.getMessage());
@@ -152,7 +158,7 @@ class PrescoringTest {
 
 
     @Test
-    void testCheckLoanApplicationRequestDTOWhenLastNameNull_thenReturnTrow() {
+    void testWhenLastNameIsNull_thenReturnTrow() {
         Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
                     LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
                             .amount(new BigDecimal("10000"))
@@ -164,7 +170,7 @@ class PrescoringTest {
                             .passportSeries("1234")
                             .passportNumber("123456")
                             .build();
-                    Prescoring.checkLoanApplicationRequestDTO(loanApplicationRequestDTO);
+                    Prescoring.calculatePrescoring(loanApplicationRequestDTO);
                 }
         );
         assertEquals("Last name cannot be null", exception.getMessage());
@@ -172,7 +178,7 @@ class PrescoringTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"L", "0123456789012345678901234567890"})
-    void testCheckLoanApplicationRequestDTOWhenIncorrectLastName_thenReturnTrow(String str) {
+    void testWhenLastNameIsIncorrect_thenReturnTrow(String str) {
         Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
                     LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
                             .amount(new BigDecimal("10000"))
@@ -185,7 +191,7 @@ class PrescoringTest {
                             .passportSeries("1234")
                             .passportNumber("123456")
                             .build();
-                    Prescoring.checkLoanApplicationRequestDTO(loanApplicationRequestDTO);
+                    Prescoring.calculatePrescoring(loanApplicationRequestDTO);
                 }
         );
         assertEquals("Last name must be between 2 and 30 characters", exception.getMessage());
@@ -193,7 +199,7 @@ class PrescoringTest {
 
 
     @Test
-    void testCheckLoanApplicationRequestDTOWhenMiddleNameNull_thenReturnTrue() {
+    void testWhenMiddleNameIsNull_thenReturnTrue() {
 
         LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
                 .amount(new BigDecimal("10000"))
@@ -205,12 +211,12 @@ class PrescoringTest {
                 .passportSeries("1234")
                 .passportNumber("123456")
                 .build();
-        assertTrue(Prescoring.checkLoanApplicationRequestDTO(loanApplicationRequestDTO));
+        assertTrue(Prescoring.calculatePrescoring(loanApplicationRequestDTO));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"M", "0123456789012345678901234567890"})
-    void testCheckLoanApplicationRequestDTOWhenIncorrectMiddleName_thenReturnTrow(String str) {
+    void testWhenMiddleNameIsIncorrect_thenReturnTrow(String str) {
         Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
                     LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
                             .amount(new BigDecimal("10000"))
@@ -223,7 +229,7 @@ class PrescoringTest {
                             .passportSeries("1234")
                             .passportNumber("123456")
                             .build();
-                    Prescoring.checkLoanApplicationRequestDTO(loanApplicationRequestDTO);
+                    Prescoring.calculatePrescoring(loanApplicationRequestDTO);
                 }
         );
         assertEquals("Middle name must be between 2 and 30 characters", exception.getMessage());
@@ -231,7 +237,7 @@ class PrescoringTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"seldeadmail.ru", "seldead@", "@mail.ru"})
-    void testCheckLoanApplicationRequestDTOWhenIncorrectEmail_thenReturnTrow(String str) {
+    void testWhenEmailIsIncorrect_thenReturnTrow(String str) {
         Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
                     LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
                             .amount(new BigDecimal("10000"))
@@ -244,14 +250,14 @@ class PrescoringTest {
                             .passportSeries("1234")
                             .passportNumber("123456")
                             .build();
-                    Prescoring.checkLoanApplicationRequestDTO(loanApplicationRequestDTO);
+                    Prescoring.calculatePrescoring(loanApplicationRequestDTO);
                 }
         );
         assertEquals("Email address has invalid format: " + str, exception.getMessage());
     }
 
     @Test
-    void testCheckLoanApplicationRequestDTOWhenPassportSeriesNull_thenReturnTrow() {
+    void testWhenPassportSeriesIsNull_thenReturnTrow() {
         Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
                     LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
                             .amount(new BigDecimal("10000"))
@@ -263,7 +269,7 @@ class PrescoringTest {
                             .birthdate(LocalDate.of(2000, 01, 01))
                             .passportNumber("123456")
                             .build();
-                    Prescoring.checkLoanApplicationRequestDTO(loanApplicationRequestDTO);
+                    Prescoring.calculatePrescoring(loanApplicationRequestDTO);
                 }
         );
         assertEquals("Passport series cannot be null", exception.getMessage());
@@ -271,7 +277,7 @@ class PrescoringTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"123", "12345", "1", "123456"})
-    void testCheckLoanApplicationRequestDTOWhenIncorrectPassportSeries_thenReturnTrow(String str) {
+    void testWhenPassportSeriesIsIncorrect_thenReturnTrow(String str) {
         Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
                     LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
                             .amount(new BigDecimal("10000"))
@@ -284,14 +290,14 @@ class PrescoringTest {
                             .passportSeries(str)
                             .passportNumber("123456")
                             .build();
-                    Prescoring.checkLoanApplicationRequestDTO(loanApplicationRequestDTO);
+                    Prescoring.calculatePrescoring(loanApplicationRequestDTO);
                 }
         );
         assertEquals("Passport series must consist 4 characters", exception.getMessage());
     }
 
     @Test
-    void testCheckLoanApplicationRequestDTOWhenPassportNumberNull_thenReturnTrow() {
+    void testWhenPassportNumberIsNull_thenReturnTrow() {
         Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
                     LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
                             .amount(new BigDecimal("10000"))
@@ -303,7 +309,7 @@ class PrescoringTest {
                             .birthdate(LocalDate.of(2000, 01, 01))
                             .passportSeries("1234")
                             .build();
-                    Prescoring.checkLoanApplicationRequestDTO(loanApplicationRequestDTO);
+                    Prescoring.calculatePrescoring(loanApplicationRequestDTO);
                 }
         );
         assertEquals("Passport number cannot be null", exception.getMessage());
@@ -311,7 +317,7 @@ class PrescoringTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"12345", "1234567", "1", "12"})
-    void testCheckLoanApplicationRequestDTOWhenIncorrectPassportNumber_thenReturnTrow(String str) {
+    void testWhenPassportNumberIsIncorrect_thenReturnTrow(String str) {
         Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
                     LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
                             .amount(new BigDecimal("10000"))
@@ -324,14 +330,14 @@ class PrescoringTest {
                             .passportSeries("1234")
                             .passportNumber(str)
                             .build();
-                    Prescoring.checkLoanApplicationRequestDTO(loanApplicationRequestDTO);
+                    Prescoring.calculatePrescoring(loanApplicationRequestDTO);
                 }
         );
         assertEquals("Passport number must consist 6 characters", exception.getMessage());
     }
 
     @Test
-    void testCheckLoanApplicationRequestDTO() {
+    void testWhenLoanApplicationIsCorrect_thenReturnTrue() {
         LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
                 .amount(new BigDecimal("10000"))
                 .term(10)
@@ -343,6 +349,6 @@ class PrescoringTest {
                 .passportSeries("1234")
                 .passportNumber("123456")
                 .build();
-        assertTrue(Prescoring.checkLoanApplicationRequestDTO(loanApplicationRequestDTO));
+        assertTrue(Prescoring.calculatePrescoring(loanApplicationRequestDTO));
     }
 }

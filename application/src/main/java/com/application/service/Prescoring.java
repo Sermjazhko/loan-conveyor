@@ -1,4 +1,4 @@
-package com.application.validation;
+package com.application.service;
 
 import com.application.dto.LoanApplicationRequestDTO;
 import lombok.extern.slf4j.Slf4j;
@@ -26,9 +26,9 @@ public class Prescoring {
         if (!(localDate.toString().matches("\\d{4}-\\d{2}-\\d{2}"))) {
             throw new IllegalArgumentException("Invalid date format");
         }
+
         LocalDate localDateNow = LocalDate.now();
         long years = localDate.until(localDateNow, ChronoUnit.YEARS);
-
         log.info("User years = " + years);
 
         if (years < minUserAge) {
@@ -37,11 +37,12 @@ public class Prescoring {
         return true;
     }
 
-    public static boolean checkLoanApplicationRequestDTO(LoanApplicationRequestDTO loanApplicationRequestDTO) {
+    public static boolean calculatePrescoring(LoanApplicationRequestDTO loanApplicationRequestDTO) {
 
         log.info("Loan application request: " + loanApplicationRequestDTO);
 
         isValidDate(loanApplicationRequestDTO.getBirthdate());
+
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         Validator validator = factory.getValidator();
         Set<ConstraintViolation<LoanApplicationRequestDTO>> constraintViolations =
