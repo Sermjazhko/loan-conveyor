@@ -2,96 +2,278 @@ package com.application.service;
 
 import com.application.dto.LoanApplicationRequestDTO;
 import com.application.dto.LoanOfferDTO;
+import com.application.exception.PrescoringException;
+import com.application.integration.DealService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 
 @ExtendWith(MockitoExtension.class)
 class ApplicationServiceTest {
 
     @Mock
-    private RestTemplate restTemplate;
+    private DealService dealService;
 
     @InjectMocks
     private ApplicationService applicationService;
 
     @Test
-    void testCreateLoanApplication() {
-        LoanOfferDTO loanOfferDTO1 = LoanOfferDTO.builder()
-                .applicationId(1L)
-                .term(12)
-                .rate(new BigDecimal("10.0"))
-                .requestedAmount(new BigDecimal("10000.00"))
-                .isInsuranceEnabled(true)
-                .isSalaryClient(false)
-                .monthlyPayment(new BigDecimal("1000.00"))
-                .build();
-        LoanOfferDTO loanOfferDTO2 = LoanOfferDTO.builder()
-                .applicationId(2L)
-                .term(10)
-                .rate(new BigDecimal("12.0"))
-                .requestedAmount(new BigDecimal("12000.00"))
-                .isInsuranceEnabled(false)
-                .isSalaryClient(true)
-                .monthlyPayment(new BigDecimal("1200.00"))
-                .build();
+    void testWhenLoanApplicationIsCorrect_createApplication() {
+        assertDoesNotThrow(() -> {
+                    LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
+                            .amount(new BigDecimal("10000"))
+                            .term(6)
+                            .firstName("First")
+                            .lastName("Last")
+                            .email("seldead@mail.ru")
+                            .birthdate(LocalDate.of(2000, 01, 01))
+                            .passportSeries("1234")
+                            .passportNumber("123456")
+                            .build();
+                    applicationService.createLoanApplication(loanApplicationRequestDTO);
+                    Mockito.verify(dealService, Mockito.times(1)).createLoanApplication(loanApplicationRequestDTO);
+                }
+        );
+    }
 
-        LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
-                .amount(new BigDecimal("10000"))
-                .term(12)
-                .firstName("First")
-                .lastName("Last")
-                .middleName("Middle")
-                .email("seldead@mail.ru")
-                .birthdate(LocalDate.of(2000, 01, 01))
-                .passportSeries("1234")
-                .passportNumber("123456")
-                .build();
-
-        LoanOfferDTO[] listLoan = new LoanOfferDTO[2];
-        listLoan[0] = loanOfferDTO1;
-        listLoan[1] = loanOfferDTO2;
-
-        Mockito.when(restTemplate.postForObject(any(String.class), any(Object.class), any(Class.class))).
-                thenReturn(listLoan);
-
-        List<LoanOfferDTO> list = applicationService.createLoanApplication(loanApplicationRequestDTO);
-
-        Mockito.verify(restTemplate, Mockito.times(1)).
-                postForObject(any(String.class), any(Object.class), any(Class.class));
-
-        assertEquals(loanOfferDTO1.getApplicationId(), list.get(0).getApplicationId());
-        assertEquals(loanOfferDTO1.getTerm(), list.get(0).getTerm());
-        assertEquals(loanOfferDTO1.getRate(), list.get(0).getRate());
-        assertEquals(loanOfferDTO1.getRequestedAmount(), list.get(0).getRequestedAmount());
-        assertEquals(loanOfferDTO1.getIsInsuranceEnabled(), list.get(0).getIsInsuranceEnabled());
-        assertEquals(loanOfferDTO1.getIsSalaryClient(), list.get(0).getIsSalaryClient());
-        assertEquals(loanOfferDTO1.getMonthlyPayment(), list.get(0).getMonthlyPayment());
-
-
-        assertEquals(loanOfferDTO2.getApplicationId(), list.get(1).getApplicationId());
-        assertEquals(loanOfferDTO2.getTerm(), list.get(1).getTerm());
-        assertEquals(loanOfferDTO2.getRate(), list.get(1).getRate());
-        assertEquals(loanOfferDTO2.getRequestedAmount(), list.get(1).getRequestedAmount());
-        assertEquals(loanOfferDTO2.getIsInsuranceEnabled(), list.get(1).getIsInsuranceEnabled());
-        assertEquals(loanOfferDTO2.getIsSalaryClient(), list.get(1).getIsSalaryClient());
-        assertEquals(loanOfferDTO2.getMonthlyPayment(), list.get(1).getMonthlyPayment());
+    @Test
+    void testWhenLoanApplicationIsIncorrect_notCreateApplication() {
+        assertThrows(PrescoringException.class, () -> {
+                    LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
+                            .amount(new BigDecimal("10000"))
+                            .term(6)
+                            .firstName("F")
+                            .lastName("Last")
+                            .email("seldead@mail.ru")
+                            .birthdate(LocalDate.of(2000, 01, 01))
+                            .passportSeries("1234")
+                            .passportNumber("123456")
+                            .build();
+                    applicationService.createLoanApplication(loanApplicationRequestDTO);
+                    Mockito.verify(dealService, Mockito.times(0)).createLoanApplication(loanApplicationRequestDTO);
+                }
+        );
     }
 
     @Test
     void testApplyOffer() {
-        applicationService.applyOffer(new LoanOfferDTO());
-        Mockito.verify(restTemplate, Mockito.times(1)).put(any(String.class), any(Object.class));
+        assertDoesNotThrow(() -> {
+                    LoanOfferDTO loanOfferDTO = new LoanOfferDTO();
+                    applicationService.applyOffer(loanOfferDTO);
+                    Mockito.verify(dealService, Mockito.times(1)).applyOffer(loanOfferDTO);
+                }
+        );
+    }
+
+    @Test
+    void testWhenAmountLessPrescoringAmount_returnTrow() {
+        Throwable exception = assertThrows(PrescoringException.class, () -> {
+                    LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
+                            .amount(new BigDecimal("9999.99"))
+                            .term(6)
+                            .firstName("First")
+                            .lastName("Last")
+                            .email("seldead@mail.ru")
+                            .birthdate(LocalDate.of(2000, 01, 01))
+                            .passportSeries("1234")
+                            .passportNumber("123456")
+                            .build();
+                    applicationService.calculatePrescoring(loanApplicationRequestDTO);
+                }
+        );
+        assertEquals("Amount cannot be less 10 000", exception.getMessage());
+    }
+
+    @Test
+    void testWhenTermLessPrescoringTerm_returnTrow() {
+        Throwable exception = assertThrows(PrescoringException.class, () -> {
+                    LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
+                            .amount(new BigDecimal("10000"))
+                            .term(5)
+                            .firstName("First")
+                            .lastName("Last")
+                            .email("seldead@mail.ru")
+                            .birthdate(LocalDate.of(2000, 01, 01))
+                            .passportSeries("1234")
+                            .passportNumber("123456")
+                            .build();
+                    applicationService.calculatePrescoring(loanApplicationRequestDTO);
+                }
+        );
+        assertEquals("Term cannot be less 6", exception.getMessage());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"F", "0123456789012345678901234567890"})
+    void testWhenFirstNameIsIncorrect_returnTrow(String str) {
+        Throwable exception = assertThrows(PrescoringException.class, () -> {
+                    LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
+                            .amount(new BigDecimal("10000"))
+                            .term(6)
+                            .firstName(str)
+                            .lastName("Last")
+                            .email("seldead@mail.ru")
+                            .birthdate(LocalDate.of(2000, 01, 01))
+                            .passportSeries("1234")
+                            .passportNumber("123456")
+                            .build();
+                    applicationService.calculatePrescoring(loanApplicationRequestDTO);
+                }
+        );
+        assertEquals("First name must be between 2 and 30 characters", exception.getMessage());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"L", "0123456789012345678901234567890"})
+    void testWhenLastNameIsIncorrect_thenReturnTrow(String str) {
+        Throwable exception = assertThrows(PrescoringException.class, () -> {
+                    LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
+                            .amount(new BigDecimal("10000"))
+                            .term(10)
+                            .firstName("First")
+                            .lastName(str)
+                            .middleName("Middle")
+                            .email("seldead@mail.ru")
+                            .birthdate(LocalDate.of(2000, 01, 01))
+                            .passportSeries("1234")
+                            .passportNumber("123456")
+                            .build();
+                    applicationService.calculatePrescoring(loanApplicationRequestDTO);
+                }
+        );
+        assertEquals("Last name must be between 2 and 30 characters", exception.getMessage());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"M", "0123456789012345678901234567890"})
+    void testWhenMiddleNameIsIncorrect_thenReturnTrow(String str) {
+        Throwable exception = assertThrows(PrescoringException.class, () -> {
+                    LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
+                            .amount(new BigDecimal("10000"))
+                            .term(10)
+                            .firstName("First")
+                            .lastName("Last")
+                            .middleName(str)
+                            .email("seldead@mail.ru")
+                            .birthdate(LocalDate.of(2000, 01, 01))
+                            .passportSeries("1234")
+                            .passportNumber("123456")
+                            .build();
+                    applicationService.calculatePrescoring(loanApplicationRequestDTO);
+                }
+        );
+        assertEquals("Middle name must be between 2 and 30 characters", exception.getMessage());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"seldeadmail.ru", "seldead@", "@mail.ru"})
+    void testWhenEmailIsIncorrect_thenReturnTrow(String str) {
+        Throwable exception = assertThrows(PrescoringException.class, () -> {
+                    LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
+                            .amount(new BigDecimal("10000"))
+                            .term(10)
+                            .firstName("First")
+                            .lastName("Last")
+                            .middleName("Middle")
+                            .email(str)
+                            .birthdate(LocalDate.of(2000, 01, 01))
+                            .passportSeries("1234")
+                            .passportNumber("123456")
+                            .build();
+                    applicationService.calculatePrescoring(loanApplicationRequestDTO);
+                }
+        );
+        assertEquals("Email address has invalid format. Does not match the pattern: ^[A-Za-z0-9+_.-]+@(.+)$", exception.getMessage());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"123", "12345", "1", "123456"})
+    void testWhenPassportSeriesIsIncorrect_thenReturnTrow(String str) {
+        Throwable exception = assertThrows(PrescoringException.class, () -> {
+                    LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
+                            .amount(new BigDecimal("10000"))
+                            .term(10)
+                            .firstName("First")
+                            .lastName("Last")
+                            .middleName("Middle")
+                            .email("seldead@mail.ru")
+                            .birthdate(LocalDate.of(2000, 01, 01))
+                            .passportSeries(str)
+                            .passportNumber("123456")
+                            .build();
+                    applicationService.calculatePrescoring(loanApplicationRequestDTO);
+                }
+        );
+        assertEquals("Passport series must consist 4 characters", exception.getMessage());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"12345", "1234567", "1", "12"})
+    void testWhenPassportNumberIsIncorrect_thenReturnTrow(String str) {
+        Throwable exception = assertThrows(PrescoringException.class, () -> {
+                    LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
+                            .amount(new BigDecimal("10000"))
+                            .term(10)
+                            .firstName("First")
+                            .lastName("Last")
+                            .middleName("Middle")
+                            .email("seldead@mail.ru")
+                            .birthdate(LocalDate.of(2000, 01, 01))
+                            .passportSeries("1234")
+                            .passportNumber(str)
+                            .build();
+                    applicationService.calculatePrescoring(loanApplicationRequestDTO);
+                }
+        );
+        assertEquals("Passport number must consist 6 characters", exception.getMessage());
+    }
+
+    @Test
+    void testWhenLoanApplicationIsCorrect_thenReturnTrue() {
+        assertDoesNotThrow(() -> {
+                    LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
+                            .amount(new BigDecimal("10000"))
+                            .term(10)
+                            .firstName("First")
+                            .lastName("Last")
+                            .middleName("Middle")
+                            .email("seldead@mail.ru")
+                            .birthdate(LocalDate.of(2000, 01, 01))
+                            .passportSeries("1234")
+                            .passportNumber("123456")
+                            .build();
+
+                    applicationService.calculatePrescoring(loanApplicationRequestDTO);
+                }
+        );
+    }
+
+    @Test
+    void testWhenAgeLessThan18_returnTrow() {
+        Throwable exception = assertThrows(PrescoringException.class, () -> {
+                    LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
+                            .amount(new BigDecimal("10000"))
+                            .term(6)
+                            .firstName("First")
+                            .lastName("Last")
+                            .email("seldead@mail.ru")
+                            .birthdate(LocalDate.of(2006, 01, 01))
+                            .passportSeries("1234")
+                            .passportNumber("123456")
+                            .build();
+                    applicationService.calculatePrescoring(loanApplicationRequestDTO);
+                }
+        );
+        assertEquals("Age less than 18 years", exception.getMessage());
     }
 }
