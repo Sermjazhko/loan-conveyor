@@ -22,30 +22,33 @@ public class GlobalControllerAdvice {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidationExceptions(
-            MethodArgumentNotValidException ex) {
+            MethodArgumentNotValidException e) {
         Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getAllErrors().forEach(error -> {
+        e.getBindingResult().getAllErrors().forEach(error -> {
             String fieldName = ((FieldError) error).getField();
             String errorMessage = error.getDefaultMessage();
             errors.put(fieldName, errorMessage);
         });
+        log.error(e.getMessage(), e);
         return ResponseEntity
                 .status(BAD_REQUEST)
                 .body(errors);
     }
 
     @ExceptionHandler(PrescoringException.class)
-    public ResponseEntity<List<String>> handlePrescoringException(PrescoringException exception) {
-        List<String> errors = exception.getAllErrors();
+    public ResponseEntity<List<String>> handlePrescoringException(PrescoringException e) {
+        List<String> errors = e.getAllErrors();
+        log.error(e.getMessage(), e);
         return ResponseEntity
                 .status(BAD_REQUEST)
                 .body(errors);
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorMessage> handleAllException(Exception exception) {
+    public ResponseEntity<ErrorMessage> handleAllException(Exception e) {
+        log.error(e.getMessage(), e);
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ErrorMessage(exception.getMessage()));
+                .body(new ErrorMessage(e.getMessage()));
     }
 }

@@ -31,9 +31,8 @@ public class ApplicationController {
             description = "Data prescoring and application creation."
     )
     @PostMapping("")
-    public List<LoanOfferDTO> createApplication(@Valid @RequestBody
-                                                @Parameter(description = "Application for a loan")
-                                                        LoanApplicationRequestDTO loanApplicationRequestDTO) throws PrescoringException {
+    public List<LoanOfferDTO> createApplication(@Valid @RequestBody @Parameter(description = "Application for a loan")
+        LoanApplicationRequestDTO loanApplicationRequestDTO) throws PrescoringException {
 
         log.info("Input data to the offer, Loan Application Request: " + loanApplicationRequestDTO);
         List<LoanOfferDTO> loanOfferDTOS = applicationService.createLoanApplication(loanApplicationRequestDTO);
@@ -47,8 +46,7 @@ public class ApplicationController {
             description = "Updating the application statuses and accepting the offer"
     )
     @PutMapping("/offer")
-    public void applyOffer(@Valid @RequestBody @Parameter(description = "loan offer")
-                                   LoanOfferDTO loanOfferDTO) {
+    public void applyOffer(@Valid @RequestBody @Parameter(description = "loan offer") LoanOfferDTO loanOfferDTO) {
         log.info("Input data to the calculation, loan offer DTO: " + loanOfferDTO);
         applicationService.applyOffer(loanOfferDTO);
     }

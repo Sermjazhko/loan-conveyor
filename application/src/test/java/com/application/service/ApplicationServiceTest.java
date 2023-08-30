@@ -10,13 +10,14 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class ApplicationServiceTest {
@@ -28,7 +29,7 @@ class ApplicationServiceTest {
     private ApplicationService applicationService;
 
     @Test
-    void testWhenLoanApplicationIsCorrect_createApplication() {
+    void whenLoanApplicationIsCorrect_createApplication() {
         assertDoesNotThrow(() -> {
                     LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
                             .amount(new BigDecimal("10000"))
@@ -41,13 +42,13 @@ class ApplicationServiceTest {
                             .passportNumber("123456")
                             .build();
                     applicationService.createLoanApplication(loanApplicationRequestDTO);
-                    Mockito.verify(dealService, Mockito.times(1)).createLoanApplication(loanApplicationRequestDTO);
+                    verify(dealService).createLoanApplication(loanApplicationRequestDTO);
                 }
         );
     }
 
     @Test
-    void testWhenLoanApplicationIsIncorrect_notCreateApplication() {
+    void whenLoanApplicationIsIncorrect_notCreateApplication() {
         assertThrows(PrescoringException.class, () -> {
                     LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
                             .amount(new BigDecimal("10000"))
@@ -60,23 +61,23 @@ class ApplicationServiceTest {
                             .passportNumber("123456")
                             .build();
                     applicationService.createLoanApplication(loanApplicationRequestDTO);
-                    Mockito.verify(dealService, Mockito.times(0)).createLoanApplication(loanApplicationRequestDTO);
+                    verify(dealService, never()).createLoanApplication(loanApplicationRequestDTO);
                 }
         );
     }
 
     @Test
-    void testApplyOffer() {
+    void applyOffer() {
         assertDoesNotThrow(() -> {
                     LoanOfferDTO loanOfferDTO = new LoanOfferDTO();
                     applicationService.applyOffer(loanOfferDTO);
-                    Mockito.verify(dealService, Mockito.times(1)).applyOffer(loanOfferDTO);
+                    verify(dealService).applyOffer(loanOfferDTO);
                 }
         );
     }
 
     @Test
-    void testWhenAmountLessPrescoringAmount_returnTrow() {
+    void whenAmountLessPrescoringAmount_returnTrow() {
         Throwable exception = assertThrows(PrescoringException.class, () -> {
                     LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
                             .amount(new BigDecimal("9999.99"))
@@ -88,14 +89,14 @@ class ApplicationServiceTest {
                             .passportSeries("1234")
                             .passportNumber("123456")
                             .build();
-                    applicationService.calculatePrescoring(loanApplicationRequestDTO);
+                    applicationService.createLoanApplication(loanApplicationRequestDTO);
                 }
         );
-        assertEquals("Amount cannot be less 10 000", exception.getMessage());
+        assertEquals("Prescoring error", exception.getMessage());
     }
 
     @Test
-    void testWhenTermLessPrescoringTerm_returnTrow() {
+    void whenTermLessPrescoringTerm_returnTrow() {
         Throwable exception = assertThrows(PrescoringException.class, () -> {
                     LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
                             .amount(new BigDecimal("10000"))
@@ -107,15 +108,15 @@ class ApplicationServiceTest {
                             .passportSeries("1234")
                             .passportNumber("123456")
                             .build();
-                    applicationService.calculatePrescoring(loanApplicationRequestDTO);
+                    applicationService.createLoanApplication(loanApplicationRequestDTO);
                 }
         );
-        assertEquals("Term cannot be less 6", exception.getMessage());
+        assertEquals("Prescoring error", exception.getMessage());
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"F", "0123456789012345678901234567890"})
-    void testWhenFirstNameIsIncorrect_returnTrow(String str) {
+    void whenFirstNameIsIncorrect_returnTrow(String str) {
         Throwable exception = assertThrows(PrescoringException.class, () -> {
                     LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
                             .amount(new BigDecimal("10000"))
@@ -127,15 +128,15 @@ class ApplicationServiceTest {
                             .passportSeries("1234")
                             .passportNumber("123456")
                             .build();
-                    applicationService.calculatePrescoring(loanApplicationRequestDTO);
+                    applicationService.createLoanApplication(loanApplicationRequestDTO);
                 }
         );
-        assertEquals("First name must be between 2 and 30 characters", exception.getMessage());
+        assertEquals("Prescoring error", exception.getMessage());
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"L", "0123456789012345678901234567890"})
-    void testWhenLastNameIsIncorrect_thenReturnTrow(String str) {
+    void whenLastNameIsIncorrect_thenReturnTrow(String str) {
         Throwable exception = assertThrows(PrescoringException.class, () -> {
                     LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
                             .amount(new BigDecimal("10000"))
@@ -148,15 +149,15 @@ class ApplicationServiceTest {
                             .passportSeries("1234")
                             .passportNumber("123456")
                             .build();
-                    applicationService.calculatePrescoring(loanApplicationRequestDTO);
+                    applicationService.createLoanApplication(loanApplicationRequestDTO);
                 }
         );
-        assertEquals("Last name must be between 2 and 30 characters", exception.getMessage());
+        assertEquals("Prescoring error", exception.getMessage());
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"M", "0123456789012345678901234567890"})
-    void testWhenMiddleNameIsIncorrect_thenReturnTrow(String str) {
+    void whenMiddleNameIsIncorrect_thenReturnTrow(String str) {
         Throwable exception = assertThrows(PrescoringException.class, () -> {
                     LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
                             .amount(new BigDecimal("10000"))
@@ -169,15 +170,15 @@ class ApplicationServiceTest {
                             .passportSeries("1234")
                             .passportNumber("123456")
                             .build();
-                    applicationService.calculatePrescoring(loanApplicationRequestDTO);
+                    applicationService.createLoanApplication(loanApplicationRequestDTO);
                 }
         );
-        assertEquals("Middle name must be between 2 and 30 characters", exception.getMessage());
+        assertEquals("Prescoring error", exception.getMessage());
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"seldeadmail.ru", "seldead@", "@mail.ru"})
-    void testWhenEmailIsIncorrect_thenReturnTrow(String str) {
+    void whenEmailIsIncorrect_thenReturnTrow(String str) {
         Throwable exception = assertThrows(PrescoringException.class, () -> {
                     LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
                             .amount(new BigDecimal("10000"))
@@ -190,15 +191,15 @@ class ApplicationServiceTest {
                             .passportSeries("1234")
                             .passportNumber("123456")
                             .build();
-                    applicationService.calculatePrescoring(loanApplicationRequestDTO);
+                    applicationService.createLoanApplication(loanApplicationRequestDTO);
                 }
         );
-        assertEquals("Email address has invalid format. Does not match the pattern: ^[A-Za-z0-9+_.-]+@(.+)$", exception.getMessage());
+        assertEquals("Prescoring error", exception.getMessage());
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"123", "12345", "1", "123456"})
-    void testWhenPassportSeriesIsIncorrect_thenReturnTrow(String str) {
+    void whenPassportSeriesIsIncorrect_thenReturnTrow(String str) {
         Throwable exception = assertThrows(PrescoringException.class, () -> {
                     LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
                             .amount(new BigDecimal("10000"))
@@ -211,15 +212,15 @@ class ApplicationServiceTest {
                             .passportSeries(str)
                             .passportNumber("123456")
                             .build();
-                    applicationService.calculatePrescoring(loanApplicationRequestDTO);
+                    applicationService.createLoanApplication(loanApplicationRequestDTO);
                 }
         );
-        assertEquals("Passport series must consist 4 characters", exception.getMessage());
+        assertEquals("Prescoring error", exception.getMessage());
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"12345", "1234567", "1", "12"})
-    void testWhenPassportNumberIsIncorrect_thenReturnTrow(String str) {
+    void whenPassportNumberIsIncorrect_thenReturnTrow(String str) {
         Throwable exception = assertThrows(PrescoringException.class, () -> {
                     LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
                             .amount(new BigDecimal("10000"))
@@ -232,14 +233,14 @@ class ApplicationServiceTest {
                             .passportSeries("1234")
                             .passportNumber(str)
                             .build();
-                    applicationService.calculatePrescoring(loanApplicationRequestDTO);
+                    applicationService.createLoanApplication(loanApplicationRequestDTO);
                 }
         );
-        assertEquals("Passport number must consist 6 characters", exception.getMessage());
+        assertEquals("Prescoring error", exception.getMessage());
     }
 
     @Test
-    void testWhenLoanApplicationIsCorrect_thenReturnTrue() {
+    void whenLoanApplicationIsCorrect_thenReturnTrue() {
         assertDoesNotThrow(() -> {
                     LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
                             .amount(new BigDecimal("10000"))
@@ -253,13 +254,13 @@ class ApplicationServiceTest {
                             .passportNumber("123456")
                             .build();
 
-                    applicationService.calculatePrescoring(loanApplicationRequestDTO);
+                    applicationService.createLoanApplication(loanApplicationRequestDTO);
                 }
         );
     }
 
     @Test
-    void testWhenAgeLessThan18_returnTrow() {
+    void whenAgeLessThan18_returnTrow() {
         Throwable exception = assertThrows(PrescoringException.class, () -> {
                     LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
                             .amount(new BigDecimal("10000"))
@@ -271,9 +272,9 @@ class ApplicationServiceTest {
                             .passportSeries("1234")
                             .passportNumber("123456")
                             .build();
-                    applicationService.calculatePrescoring(loanApplicationRequestDTO);
+                    applicationService.createLoanApplication(loanApplicationRequestDTO);
                 }
         );
-        assertEquals("Age less than 18 years", exception.getMessage());
+        assertEquals("Prescoring error", exception.getMessage());
     }
 }
