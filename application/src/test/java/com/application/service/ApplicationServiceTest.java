@@ -96,7 +96,7 @@ class ApplicationServiceTest {
     }
 
     @Test
-    void whenTermLessPrescoringTerm_returnTrow() {
+    void whenTermLessPrescoring_returnTrow() {
         Throwable exception = assertThrows(PrescoringException.class, () -> {
                     LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
                             .amount(new BigDecimal("10000"))

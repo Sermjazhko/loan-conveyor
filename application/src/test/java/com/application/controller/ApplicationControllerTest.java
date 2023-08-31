@@ -11,15 +11,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -27,6 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles(value = "test")
 @ExtendWith(MockitoExtension.class)
 class ApplicationControllerTest {
     @Autowired
@@ -51,19 +49,6 @@ class ApplicationControllerTest {
                 .passportSeries("1234")
                 .passportNumber("123456")
                 .build();
-        LoanOfferDTO loanOfferDTO = LoanOfferDTO.builder()
-                .applicationId(2L)
-                .term(10)
-                .rate(new BigDecimal("12.0"))
-                .requestedAmount(new BigDecimal("12000.00"))
-                .isInsuranceEnabled(false)
-                .isSalaryClient(true)
-                .monthlyPayment(new BigDecimal("1200.00"))
-                .build();
-        List<LoanOfferDTO> loanOfferDTOS = new ArrayList<>();
-        loanOfferDTOS.add(loanOfferDTO);
-
-        when(applicationService.createLoanApplication(any())).thenReturn(loanOfferDTOS);
 
         mockMvc.perform(post("/application")
                         .contentType("application/json")
