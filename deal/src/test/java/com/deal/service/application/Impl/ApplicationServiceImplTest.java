@@ -33,7 +33,7 @@ class ApplicationServiceImplTest {
 
 
     @Test
-    public void testAddAndGetApplication() {
+    void testAddAndGetApplication() {
         //первые два метода через repository, а не сервис
         Application application = Application.builder()
                 .applicationStatus(ApplicationStatus.APPROVED)
@@ -54,7 +54,7 @@ class ApplicationServiceImplTest {
     }
 
     @Test
-    public void testCreateApplication() {
+    void testCreateApplication() {
         Jsonb jsonb = JsonbBuilder.create();
         StatusHistory statusHistory = StatusHistory.builder()
                 .status(ApplicationStatus.APPROVED)
@@ -72,7 +72,7 @@ class ApplicationServiceImplTest {
     }
 
     @Test
-    public void testCreateStatusHistory() {
+    void testCreateStatusHistory() {
         Date date = new Date();
         Jsonb jsonb = JsonbBuilder.create();
         String dateJsonb = jsonb.toJson(date);
@@ -88,7 +88,7 @@ class ApplicationServiceImplTest {
     }
 
     @Test
-    public void testUpdateStatusHistory() {
+    void testUpdateStatusHistory() {
         Date date = new Date();
 
         Jsonb jsonb = JsonbBuilder.create();

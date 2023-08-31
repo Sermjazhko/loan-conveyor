@@ -26,6 +26,7 @@ import javax.json.bind.JsonbBuilder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -58,64 +59,60 @@ public class DealController {
     public ResponseEntity<List<LoanOfferDTO>> getPostOffer(@RequestBody
                                                            @Parameter(description = "Заявка на получение кредита")
                                                                    LoanApplicationRequestDTO loanApplicationRequestDTO) {
-        try {
-            //На основе LoanApplicationRequestDTO создаётся сущность Client и сохраняется в БД.
-            log.info("Loan application request: " + loanApplicationRequestDTO);
 
-            String resultPassport = clientService.createPassport(loanApplicationRequestDTO);
-            log.info("Result jsonb passport: " + resultPassport);
+        //На основе LoanApplicationRequestDTO создаётся сущность Client и сохраняется в БД.
+        log.info("Loan application request: " + loanApplicationRequestDTO);
 
-            Client client = clientService.createClient(loanApplicationRequestDTO, resultPassport);
-            log.info("Client: " + client);
+        String resultPassport = clientService.createPassport(loanApplicationRequestDTO);
+        log.info("Result jsonb passport: " + resultPassport);
 
-            clientService.addClientToDB(client);
-            log.info("Client add!");
+        Client client = clientService.createClient(loanApplicationRequestDTO, resultPassport);
+        log.info("Client: " + client);
 
-            //Создаётся Application со связью на только что созданный Client и сохраняется в БД.
-            List<StatusHistory> list = new ArrayList<>();
+        clientService.addClientToDB(client);
+        log.info("Client add!");
 
-            String resultHistory = applicationService.createStatusHistory(list,
-                    ApplicationStatus.PREPARE_DOCUMENTS, ChangeType.AUTOMATIC, new Date());
-            log.info("Result jsonb list history: " + resultHistory);
+        //Создаётся Application со связью на только что созданный Client и сохраняется в БД.
+        List<StatusHistory> list = new ArrayList<>();
 
-            Application application = applicationService.createApplication(client.getId(), resultHistory);
-            log.info("Application: " + application);
+        String resultHistory = applicationService.createStatusHistory(list,
+                ApplicationStatus.PREPARE_DOCUMENTS, ChangeType.AUTOMATIC, new Date());
+        log.info("Result jsonb list history: " + resultHistory);
 
-            applicationService.addApplicationToDB(application);
-            log.info("Application add!");
+        Application application = applicationService.createApplication(client.getId(), resultHistory);
 
-            //Отправляется POST запрос на /conveyor/offers МС conveyor через FeignClient (здесь и далее вместо
-            // FeignClient можно использовать RestTemplate). Каждому элементу из списка List<LoanOfferDTO> присваивается id созданной заявки (Application)
-            String resourceUrl = "http://localhost:9090/conveyor/offers";
+        log.info("Application: " + application);
 
-            RestTemplate restTemplate = new RestTemplate();
+        applicationService.addApplicationToDB(application);
+        log.info("Application add!");
 
-            log.info("Start POST request!");
+        //Отправляется POST запрос на /conveyor/offers МС conveyor через FeignClient (здесь и далее вместо
+        // FeignClient можно использовать RestTemplate). Каждому элементу из списка List<LoanOfferDTO> присваивается id созданной заявки (Application)
+        String resourceUrl = "http://localhost:9090/conveyor/offers";
 
-            HttpEntity<LoanApplicationRequestDTO> request =
-                    new HttpEntity<LoanApplicationRequestDTO>(loanApplicationRequestDTO);
+        RestTemplate restTemplate = new RestTemplate();
 
-            ResponseEntity<List<LoanOfferDTO>> rateResponse =
-                    restTemplate.exchange(resourceUrl,
-                            HttpMethod.POST, request, new ParameterizedTypeReference<List<LoanOfferDTO>>() {
-                            });
-            log.info("End POST request!");
+        log.info("Start POST request!");
 
-            List<LoanOfferDTO> loanOfferDTOS = rateResponse.getBody();
+        HttpEntity<LoanApplicationRequestDTO> request =
+                new HttpEntity<LoanApplicationRequestDTO>(loanApplicationRequestDTO);
 
-            for (int index = 0; index < 4; ++index) {
-                loanOfferDTOS.get(index).setApplicationId(application.getId());
-            }
+        ResponseEntity<List<LoanOfferDTO>> rateResponse =
+                restTemplate.exchange(resourceUrl,
+                        HttpMethod.POST, request, new ParameterizedTypeReference<List<LoanOfferDTO>>() {
+                        });
+        log.info("End POST request!");
 
-            log.info("loanOffer: " + loanOfferDTOS);
+        List<LoanOfferDTO> loanOfferDTOS = rateResponse.getBody();
 
-            return new ResponseEntity<>(loanOfferDTOS, HttpStatus.CREATED);
-        } catch (Exception e) {
-
-            log.log(Level.SEVERE, "Exception: ", e);
-
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        for (int index = 0; index < 4; ++index) {
+            loanOfferDTOS.get(index).setApplicationId(application.getId());
         }
+
+        log.info("loanOffer: " + loanOfferDTOS);
+
+        return new ResponseEntity<>(loanOfferDTOS, HttpStatus.CREATED);
+
     }
 
     @Operation(
@@ -127,33 +124,28 @@ public class DealController {
     )
     @PutMapping("/offer")
     public void putOffer(@RequestBody LoanOfferDTO loanOfferDTO) {
-        try {
-            //По API приходит LoanOfferDTO
-            // Достаётся из БД заявка(Application) по applicationId из LoanOfferDTO.
-            log.info("Input data to the offer, loanOffer: " + loanOfferDTO);
 
-            Long id = loanOfferDTO.getApplicationId();
-            Application application = applicationService.getApplicationById(id);
-            log.info("Id application: " + id + ". Application: " + application);
-            //В заявке обновляется статус, история статусов(List<ApplicationStatusHistoryDTO>),
-            // принятое предложение LoanOfferDTO устанавливается в поле appliedOffer.
+        //По API приходит LoanOfferDTO
+        // Достаётся из БД заявка(Application) по applicationId из LoanOfferDTO.
+        log.info("Input data to the offer, loanOffer: " + loanOfferDTO);
+        Long id = loanOfferDTO.getApplicationId();
+        Application application = applicationService.getApplicationById(id);
+        log.info("Id application: " + id + ". Application: " + application);
+        //В заявке обновляется статус, история статусов(List<ApplicationStatusHistoryDTO>),
+        // принятое предложение LoanOfferDTO устанавливается в поле appliedOffer.
+        Date date = new Date();
+        application = applicationService.updateApplicationStatusHistory(application, date,
+                ApplicationStatus.APPROVED);
 
-            Date date = new Date();
-            application = applicationService.updateApplicationStatusHistory(application, date,
-                    ApplicationStatus.APPROVED);
+        Jsonb jsonb = JsonbBuilder.create();
+        String resultOffer = jsonb.toJson(loanOfferDTO);
+        application.setAppliedOffer(resultOffer);
+        log.info("New application: " + application);
 
-            Jsonb jsonb = JsonbBuilder.create();
-            String resultOffer = jsonb.toJson(loanOfferDTO);
-            application.setAppliedOffer(resultOffer);
-            log.info("New application: " + application);
+        //Заявка сохраняется.
+        applicationService.addApplicationToDB(application);
+        log.info("Application update!");
 
-            //Заявка сохраняется.
-            applicationService.addApplicationToDB(application);
-            log.info("Application update!");
-        } catch (Exception e) {
-
-            log.log(Level.SEVERE, "Exception: ", e);
-        }
     }
 
     @Operation(
@@ -167,68 +159,66 @@ public class DealController {
     @PutMapping("/calculate/{applicationId}")
     public void putCalculate(@RequestBody FinishRegistrationRequestDTO finishRegistrationRequestDTO,
                              @PathVariable(value = "applicationId") Long applicationId) {
-        try {
-            //По API приходит объект FinishRegistrationRequestDTO и параметр applicationId (Long).
-            //Достаётся из БД заявка(Application) по applicationId.
-            log.info("Input data to the calculation, Finish registration request: " + finishRegistrationRequestDTO);
 
-            Application application = applicationService.getApplicationById(applicationId);
-            log.info("Application: " + application);
+        //По API приходит объект FinishRegistrationRequestDTO и параметр applicationId (Long).
+        //Достаётся из БД заявка(Application) по applicationId.
+        log.info("Input data to the calculation, Finish registration request: " + finishRegistrationRequestDTO);
 
-            //ScoringDataDTO насыщается информацией из FinishRegistrationRequestDTO и Client, который хранится в Application
-            Client client = clientService.getClientById(application.getClientId());
+        Application application = applicationService.getApplicationById(applicationId);
+        log.info("Application: " + application);
 
-            Jsonb jsonb = JsonbBuilder.create();
-            String strEmployment = jsonb.toJson(finishRegistrationRequestDTO.getEmployment());
-            //обновляем клиента
-            client.setGender(finishRegistrationRequestDTO.getGender());
-            client.setMaritalStatus(finishRegistrationRequestDTO.getMaritalStatus());
-            client.setDependentAmount(finishRegistrationRequestDTO.getDependentAmount());
-            client.setEmployment(strEmployment);
-            client.setAccount(finishRegistrationRequestDTO.getAccount());
-            log.info("client: " + client);
+        //ScoringDataDTO насыщается информацией из FinishRegistrationRequestDTO и Client, который хранится в Application
+        Client client = clientService.getClientById(application.getClientId());
 
-            clientService.addClientToDB(client);
-            log.info("Client update!");
+        Jsonb jsonb = JsonbBuilder.create();
+        String strEmployment = jsonb.toJson(finishRegistrationRequestDTO.getEmployment());
+        //обновляем клиента
+        client.setGender(finishRegistrationRequestDTO.getGender());
+        client.setMaritalStatus(finishRegistrationRequestDTO.getMaritalStatus());
+        client.setDependentAmount(finishRegistrationRequestDTO.getDependentAmount());
+        client.setEmployment(strEmployment);
+        client.setAccount(finishRegistrationRequestDTO.getAccount());
+        log.info("client: " + client);
 
-            //обновим историю статусов
-            Date date = new Date();
-            application = applicationService.updateApplicationStatusHistory(application, date,
-                    ApplicationStatus.CC_APPROVED);
+        clientService.addClientToDB(client);
+        log.info("Client update!");
 
-            log.info("Application: " + application);
+        //обновим историю статусов
+        Date date = new Date();
+        application = applicationService.updateApplicationStatusHistory(application, date,
+                ApplicationStatus.CC_APPROVED);
 
-            applicationService.addApplicationToDB(application);
-            log.info("Application update!");
+        log.info("Application: " + application);
+
+        applicationService.addApplicationToDB(application);
+        log.info("Application update!");
 
 
-            ScoringDataDTO scoringDataDTO = creditService.createScoringData(finishRegistrationRequestDTO,
-                    client, application);
-            log.info("Scoring data: " + scoringDataDTO);
+        ScoringDataDTO scoringDataDTO = creditService.createScoringData(finishRegistrationRequestDTO,
+                client, application);
+        log.info("Scoring data: " + scoringDataDTO);
 
-            String resourceUrl = "http://localhost:9090/conveyor/calculation";
+        String resourceUrl = "http://localhost:9090/conveyor/calculation";
 
-            //Отправляется POST запрос к МС КК с телом ScoringDataDTO
-            RestTemplate restTemplate = new RestTemplate();
-            log.info("Start POST request!");
+        //Отправляется POST запрос к МС КК с телом ScoringDataDTO
+        RestTemplate restTemplate = new RestTemplate();
+        log.info("Start POST request!");
 
-            HttpEntity<ScoringDataDTO> request = new HttpEntity<ScoringDataDTO>(scoringDataDTO);
-            ResponseEntity<CreditDTO> creditResponse =
-                    restTemplate.exchange(resourceUrl,
-                            HttpMethod.POST, request, new ParameterizedTypeReference<CreditDTO>() {
-                            });
-            log.info("End POST request. Credit dto: " + creditResponse);
+        HttpEntity<ScoringDataDTO> request = new HttpEntity<ScoringDataDTO>(scoringDataDTO);
+        ResponseEntity<CreditDTO> creditResponse =
+                restTemplate.exchange(resourceUrl,
+                        HttpMethod.POST, request, new ParameterizedTypeReference<CreditDTO>() {
+                        });
+        log.info("End POST request. Credit dto: " + creditResponse);
 
-            Credit credit = creditService.createCredit(creditResponse.getBody());
-            log.info("Credit: " + credit);
+        Credit credit = creditService.createCredit(creditResponse.getBody());
+        log.info("Credit: " + credit);
 
-            creditService.addCreditToDB(credit);
-            log.info("Credit add!");
+        creditService.addCreditToDB(credit);
+        log.info("Credit add!");
 
-            application.setCreditId(credit.getId());
-            applicationService.addApplicationToDB(application);
-        } catch (Exception e) {
-            log.log(Level.SEVERE, "Exception: ", e);
-        }
+        application.setCreditId(credit.getId());
+        applicationService.addApplicationToDB(application);
+
     }
 }
