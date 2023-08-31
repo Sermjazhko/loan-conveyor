@@ -77,7 +77,7 @@ class ApplicationServiceTest {
     }
 
     @Test
-    void whenAmountLessPrescoringAmount_returnTrow() {
+    void whenAmountLessPrescoringAmount_returnThrow() {
         Throwable exception = assertThrows(PrescoringException.class, () -> {
                     LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
                             .amount(new BigDecimal("9999.99"))
@@ -96,7 +96,7 @@ class ApplicationServiceTest {
     }
 
     @Test
-    void whenTermLessPrescoring_returnTrow() {
+    void whenTermLessPrescoring_returnThrow() {
         Throwable exception = assertThrows(PrescoringException.class, () -> {
                     LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
                             .amount(new BigDecimal("10000"))
@@ -116,7 +116,7 @@ class ApplicationServiceTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"F", "0123456789012345678901234567890"})
-    void whenFirstNameIsIncorrect_returnTrow(String str) {
+    void whenFirstNameIsIncorrect_returnThrow(String str) {
         Throwable exception = assertThrows(PrescoringException.class, () -> {
                     LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
                             .amount(new BigDecimal("10000"))
@@ -136,7 +136,7 @@ class ApplicationServiceTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"L", "0123456789012345678901234567890"})
-    void whenLastNameIsIncorrect_thenReturnTrow(String str) {
+    void whenLastNameIsIncorrect_thenReturnThrow(String str) {
         Throwable exception = assertThrows(PrescoringException.class, () -> {
                     LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
                             .amount(new BigDecimal("10000"))
@@ -157,7 +157,7 @@ class ApplicationServiceTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"M", "0123456789012345678901234567890"})
-    void whenMiddleNameIsIncorrect_thenReturnTrow(String str) {
+    void whenMiddleNameIsIncorrect_thenReturnThrow(String str) {
         Throwable exception = assertThrows(PrescoringException.class, () -> {
                     LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
                             .amount(new BigDecimal("10000"))
@@ -178,7 +178,7 @@ class ApplicationServiceTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"seldeadmail.ru", "seldead@", "@mail.ru"})
-    void whenEmailIsIncorrect_thenReturnTrow(String str) {
+    void whenEmailIsIncorrect_thenReturnThrow(String str) {
         Throwable exception = assertThrows(PrescoringException.class, () -> {
                     LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
                             .amount(new BigDecimal("10000"))
@@ -199,7 +199,7 @@ class ApplicationServiceTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"123", "12345", "1", "123456"})
-    void whenPassportSeriesIsIncorrect_thenReturnTrow(String str) {
+    void whenPassportSeriesIsIncorrect_thenReturnThrow(String str) {
         Throwable exception = assertThrows(PrescoringException.class, () -> {
                     LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
                             .amount(new BigDecimal("10000"))
@@ -220,7 +220,7 @@ class ApplicationServiceTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"12345", "1234567", "1", "12"})
-    void whenPassportNumberIsIncorrect_thenReturnTrow(String str) {
+    void whenPassportNumberIsIncorrect_thenReturnThrow(String str) {
         Throwable exception = assertThrows(PrescoringException.class, () -> {
                     LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
                             .amount(new BigDecimal("10000"))
@@ -240,7 +240,7 @@ class ApplicationServiceTest {
     }
 
     @Test
-    void whenLoanApplicationIsCorrect_thenReturnTrue() {
+    void whenLoanApplicationIsCorrect_thenReturnThrue() {
         assertDoesNotThrow(() -> {
                     LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
                             .amount(new BigDecimal("10000"))
@@ -260,7 +260,7 @@ class ApplicationServiceTest {
     }
 
     @Test
-    void whenAgeLessThan18_returnTrow() {
+    void whenAgeLessThan18_returnThrow() {
         Throwable exception = assertThrows(PrescoringException.class, () -> {
                     LoanApplicationRequestDTO loanApplicationRequestDTO = LoanApplicationRequestDTO.builder()
                             .amount(new BigDecimal("10000"))
