@@ -1,22 +1,21 @@
-package com.deal.dto;
+package com.dossier.dto;
 
-import com.deal.enums.ApplicationStatus;
+import com.dossier.enums.ApplicationStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
-@ToString
 @Getter
 @Setter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 @Schema(description = "information about mail")
 public class EmailMessage {
 
-    @Schema(description = "email address", example = "example@mail.ru")
+    @Schema(description = "email address")
     private String address;
-    @Schema(description = "theme", example = "Example")
+    @Schema(description = "theme")
     private ApplicationStatus theme;
-    @Schema(description = "application id", example = "1")
+    @Schema(description = "application id")
     private Long applicationId;
 }
