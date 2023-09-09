@@ -1,5 +1,6 @@
-package com.deal.controller;
+package com.conveyor.controller;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springdoc.api.ErrorMessage;
 import org.springframework.http.HttpStatus;
@@ -16,8 +17,8 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @Slf4j
 @ControllerAdvice
+@RequiredArgsConstructor
 public class GlobalControllerAdvice {
-
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidationExceptions(
             MethodArgumentNotValidException ex) {
@@ -30,13 +31,6 @@ public class GlobalControllerAdvice {
         return ResponseEntity
                 .status(BAD_REQUEST)
                 .body(errors);
-    }
-    @ExceptionHandler(IllegalAccessException.class)
-    public ResponseEntity<ErrorMessage> handleAllException(IllegalAccessException exception) {
-        log.error(exception.getMessage());
-        return ResponseEntity
-                .status(BAD_REQUEST)
-                .body(new ErrorMessage(exception.getMessage()));
     }
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorMessage> handleAllException(Exception exception) {

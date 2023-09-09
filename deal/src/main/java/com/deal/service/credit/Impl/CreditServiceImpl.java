@@ -77,4 +77,9 @@ public class CreditServiceImpl implements CreditService {
                 .creditStatus(CreditStatus.CALCULATE)
                 .build();
     }
+
+    @Override
+    public Credit getCreditById(Long id) {
+        return creditRepository.findById(id).get();
+    }
 }

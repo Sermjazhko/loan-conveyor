@@ -7,12 +7,16 @@ import com.deal.model.Application;
 import com.deal.model.Client;
 import com.deal.model.Credit;
 import com.deal.model.StatusHistory;
+import com.deal.service.DealService;
+import com.deal.service.MessageService;
 import com.deal.service.application.ApplicationService;
 import com.deal.service.client.ClientService;
 import com.deal.service.credit.CreditService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -26,27 +30,26 @@ import javax.json.bind.JsonbBuilder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-
-@Tag(name = "Deal controller", description = "Implementation of the deal microservice")
+@Slf4j
+@Tag(name = "Deal controller", description = "D")
 @RestController
 @RequestMapping("/deal")
+@RequiredArgsConstructor
 public class DealController {
 
-    private static Logger log = Logger.getLogger(DealController.class.getName());
+    private static final String TOPIC_FINISH_REGISTRATION = "finish-registration";
+    private static final String TOPIC_CREATE_DOCUMENT = "create-documents";
+    private static final String TOPIC_SEND_DOCUMENTS = "send-documents";
+    private static final String TOPIC_SEND_SES = "send-ses";
+    private static final String TOPIC_CREDIT_ISSUED = "credit-issued";
+    private static final String TOPIC_APPLICATION_DENIED = "application-denied";
 
     private final ClientService clientService;
     private final ApplicationService applicationService;
     private final CreditService creditService;
-
-    public DealController(ClientService clientService, ApplicationService applicationService, CreditService creditService) {
-        this.clientService = clientService;
-        this.applicationService = applicationService;
-        this.creditService = creditService;
-    }
+    private final MessageService messageService;
+    private final DealService dealService;
 
     @Operation(
             summary = "Calculation of possible loan terms",
@@ -58,7 +61,7 @@ public class DealController {
     @PostMapping("/application")
     public ResponseEntity<List<LoanOfferDTO>> getPostOffer(@RequestBody
                                                            @Parameter(description = "Заявка на получение кредита")
-                                                                   LoanApplicationRequestDTO loanApplicationRequestDTO) {
+                                                           LoanApplicationRequestDTO loanApplicationRequestDTO) {
 
         //На основе LoanApplicationRequestDTO создаётся сущность Client и сохраняется в БД.
         log.info("Loan application request: " + loanApplicationRequestDTO);
@@ -123,7 +126,7 @@ public class DealController {
                     "The application is saved."
     )
     @PutMapping("/offer")
-    public void putOffer(@RequestBody LoanOfferDTO loanOfferDTO) {
+    public void putOffer(@RequestBody LoanOfferDTO loanOfferDTO)  {
 
         //По API приходит LoanOfferDTO
         // Достаётся из БД заявка(Application) по applicationId из LoanOfferDTO.
@@ -146,6 +149,10 @@ public class DealController {
         applicationService.addApplicationToDB(application);
         log.info("Application update!");
 
+        Long clientId = application.getClientId();
+        Client client = clientService.getClientById(clientId);
+
+        messageService.sendMessage(ApplicationStatus.APPROVED, client.getEmail(), id, TOPIC_FINISH_REGISTRATION);
     }
 
     @Operation(
@@ -198,18 +205,19 @@ public class DealController {
                 client, application);
         log.info("Scoring data: " + scoringDataDTO);
 
-        String resourceUrl = "http://localhost:9090/conveyor/calculation";
+        try {
+            String resourceUrl = "http://localhost:9090/conveyor/calculation";
 
-        //Отправляется POST запрос к МС КК с телом ScoringDataDTO
-        RestTemplate restTemplate = new RestTemplate();
-        log.info("Start POST request!");
+            //Отправляется POST запрос к МС КК с телом ScoringDataDTO
+            RestTemplate restTemplate = new RestTemplate();
+            log.info("Start POST request!");
 
-        HttpEntity<ScoringDataDTO> request = new HttpEntity<ScoringDataDTO>(scoringDataDTO);
-        ResponseEntity<CreditDTO> creditResponse =
-                restTemplate.exchange(resourceUrl,
-                        HttpMethod.POST, request, new ParameterizedTypeReference<CreditDTO>() {
-                        });
-        log.info("End POST request. Credit dto: " + creditResponse);
+            HttpEntity<ScoringDataDTO> request = new HttpEntity<ScoringDataDTO>(scoringDataDTO);
+            ResponseEntity<CreditDTO> creditResponse =
+                    restTemplate.exchange(resourceUrl,
+                            HttpMethod.POST, request, new ParameterizedTypeReference<CreditDTO>() {
+                            });
+            log.info("End POST request. Credit dto: " + creditResponse);
 
         Credit credit = creditService.createCredit(creditResponse.getBody());
         log.info("Credit: " + credit);
@@ -220,5 +228,82 @@ public class DealController {
         application.setCreditId(credit.getId());
         applicationService.addApplicationToDB(application);
 
+        messageService.sendMessage(ApplicationStatus.CC_APPROVED, client.getEmail(), applicationId, TOPIC_CREATE_DOCUMENT);
+        } catch (Exception e) {
+            messageService.sendMessage(ApplicationStatus.CC_DENIED, client.getEmail(), applicationId, TOPIC_APPLICATION_DENIED);
+            throw  new IllegalArgumentException("Scoring failed");
+        }
+    }
+
+    @Operation(
+            summary = "request to send documents",
+            description = "request to send documents + sending a message to the mail"
+    )
+    @PostMapping("/document/{applicationId}/send")
+    public void requestToSendDocuments(@PathVariable(value = "applicationId") Long applicationId) {
+        try {
+            dealService.sendMessage(applicationId, TOPIC_SEND_DOCUMENTS, ApplicationStatus.PREPARE_DOCUMENTS);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+    }
+
+    @Operation(
+            summary = "request to sign documents",
+            description = "approval/client's refusal + request to sign documents. sending a message to the mail"
+    )
+    @PostMapping("/document/{applicationId}/sign")
+    public void requestToSignDocuments(@PathVariable(value = "applicationId") Long applicationId) {
+        try {
+            //тут какое-то условие, чтобы клиент отказался?
+            if(true) {
+                //какое-то формирование ПЭП???
+                dealService.sendMessage(applicationId, TOPIC_SEND_SES, ApplicationStatus.DOCUMENT_SIGNED);
+            } else {
+                dealService.sendMessage(applicationId, TOPIC_APPLICATION_DENIED, ApplicationStatus.CLIENT_DENIED);
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+    }
+
+    @Operation(
+            summary = "signing of documents",
+            description = "signing of documents + sending a message to the mail"
+    )
+    @PostMapping("/document/{applicationId}/code")
+    public void signingOfDocuments(@PathVariable(value = "applicationId") Long applicationId) {
+        try {
+            dealService.sendMessage(applicationId, TOPIC_CREDIT_ISSUED, ApplicationStatus.CREDIT_ISSUED);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+    }
+
+    @Operation(
+            summary = "get applicationDTO",
+            description = "getting information about the application by application id"
+    )
+    @GetMapping("/get/application/{applicationId}")
+    public ResponseEntity<LoanApplicationRequestDTO> getApplicationById(@PathVariable(value = "applicationId") Long applicationId) {
+        return dealService.getLoanApplicationByApplicationId(applicationId);
+    }
+
+    @Operation(
+            summary = "get creditDTO",
+            description = "getting information about the credit by application id"
+    )
+    @GetMapping("/get/credit/{applicationId}")
+    public ResponseEntity<CreditDTO> getCreditByApplicationId(@PathVariable(value = "applicationId") Long applicationId) {
+        return dealService.getCreditByApplicationId(applicationId);
+    }
+
+    @Operation(
+            summary = "get offedDTO",
+            description = "getting information about the offer by application id"
+    )
+    @GetMapping("/get/offer/{applicationId}")
+    public ResponseEntity<LoanOfferDTO> getOfferByApplicationId(@PathVariable(value = "applicationId") Long applicationId) {
+        return dealService.getOfferByApplicationId(applicationId);
     }
 }

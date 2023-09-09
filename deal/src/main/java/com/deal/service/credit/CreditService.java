@@ -15,4 +15,6 @@ public interface CreditService {
                                      Client client, Application application);
 
     Credit createCredit(CreditDTO creditDTO);
+
+    Credit getCreditById(Long id);
 }

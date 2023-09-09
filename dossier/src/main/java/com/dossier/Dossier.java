@@ -1,11 +1,11 @@
-package com.deal;
+package com.dossier;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class Deal {
-    public static void main(String[] args){
-        SpringApplication.run(Deal.class, args);
+public class Dossier {
+    public static void main(String[] args)  {
+        SpringApplication.run(Dossier.class, args);
     }
 }

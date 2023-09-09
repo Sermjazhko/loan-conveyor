@@ -63,7 +63,7 @@ public class ConveyorServiceImpl implements ConveyorService {
     }
 
     @Override
-    public CreditDTO getCalculation(ScoringDataDTO scoringDataDTO) throws IOException {
+    public CreditDTO getCalculation(ScoringDataDTO scoringDataDTO) throws IOException, IllegalArgumentException {
 
         //скоринг данных
         BigDecimal insurance = scoringService.getBaseRateAndInsurance().get(1);

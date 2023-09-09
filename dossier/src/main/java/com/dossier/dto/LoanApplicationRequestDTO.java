@@ -1,4 +1,4 @@
-package com.deal.dto;
+package com.dossier.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;

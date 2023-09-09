@@ -1,0 +1,14 @@
+Profile: 
+
+First Name: Liza
+Last Name: Serm
+Middle Name: null
+Email: seldead@mail.ru
+Birthdate: 2000-09-30
+Passport series: 2000
+Passport number: 200000
+Loan offer: 
+Request amount: 100000
+Term: 12
+Rate: 15
+Monthly payment: 9025.83
