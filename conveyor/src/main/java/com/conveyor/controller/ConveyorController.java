@@ -54,7 +54,7 @@ public class ConveyorController {
         } catch (Exception e) {
             log.log(Level.SEVERE, "Exception: ", e);
 
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new IllegalArgumentException("Prescoring falied");
         }
     }
 

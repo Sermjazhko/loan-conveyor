@@ -31,6 +31,7 @@ public class GlobalControllerAdvice {
                 .status(BAD_REQUEST)
                 .body(errors);
     }
+
     @ExceptionHandler(IllegalAccessException.class)
     public ResponseEntity<ErrorMessage> handleAllException(IllegalAccessException exception) {
         log.error(exception.getMessage());
@@ -38,6 +39,7 @@ public class GlobalControllerAdvice {
                 .status(BAD_REQUEST)
                 .body(new ErrorMessage(exception.getMessage()));
     }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorMessage> handleAllException(Exception exception) {
         log.error(exception.getMessage());

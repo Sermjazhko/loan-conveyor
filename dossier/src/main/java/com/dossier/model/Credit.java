@@ -1,10 +1,11 @@
-package com.dossier.dto;
+package com.dossier.model;
 
+import com.dossier.enums.CreditStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.List;
 
 @Builder
 @Getter
@@ -12,16 +13,26 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString(includeFieldNames=true)
-@Schema(description = "Loan Information")
-public class CreditDTO {
+@Schema(description = "Credit data")
+public class Credit implements Serializable {
+
+    private Long id;
 
     private BigDecimal amount;
+
     private Integer term;
-    @Schema(description = "Monthly (annuity) payment")
+
     private BigDecimal monthlyPayment;
+
     private BigDecimal rate;
+
     private BigDecimal psk;
-    private Boolean isInsuranceEnabled;
-    private Boolean isSalaryClient;
-    private List<PaymentScheduleElement> paymentSchedule;
+
+    private String paymentSchedule;
+
+    private Boolean insuranceEnable;
+
+    private Boolean salaryClient;
+
+    private CreditStatus creditStatus;
 }

@@ -30,7 +30,6 @@ public class Client implements Serializable {
     @Id
     @Column(name = "client_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    // указывает, что свойство будет создаваться согласно указанной стратегии
     private Long id;
 
     @Column(name = "first_name")

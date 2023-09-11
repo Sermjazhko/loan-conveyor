@@ -20,7 +20,7 @@ public class MessageService {
 
     public void sendMessage(ApplicationStatus applicationStatus, String address, Long applicationId, String topicName) {
         try {
-
+            log.info("status: " + applicationStatus + ", recipient's address: " + address + ", id: " + applicationId + ", topic: " + topicName);
             EmailMessage emailMessage = EmailMessage.builder()
                     .theme(applicationStatus)
                     .address(address)
@@ -28,6 +28,7 @@ public class MessageService {
                     .build();
             String jsonStr = objectMapper.writeValueAsString(emailMessage);
             kafkaSender.sendMessage(jsonStr, topicName);
+            log.info("deal has successfully sent the message");
         } catch (Exception e) {
             log.error(e.getMessage());
         }

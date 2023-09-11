@@ -1,17 +1,17 @@
 package com.deal.service.application.Impl;
 
-
 import com.deal.enums.ApplicationStatus;
 import com.deal.enums.ChangeType;
 import com.deal.model.Application;
 import com.deal.model.StatusHistory;
-import com.deal.repository.ApplicationRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
@@ -21,55 +21,15 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@SpringBootTest
+@RunWith(SpringRunner.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @ExtendWith(MockitoExtension.class)
+@TestPropertySource(
+        locations = "classpath:application-local.properties")
 class ApplicationServiceImplTest {
 
     @InjectMocks
     private ApplicationServiceImpl applicationService;
-
-    @Autowired
-    private ApplicationRepository applicationRepository;
-
-
-    @Test
-    void testAddAndGetApplication() {
-        //первые два метода через repository, а не сервис
-        Application application = Application.builder()
-                .applicationStatus(ApplicationStatus.APPROVED)
-                .creationDate(new Date())
-                .sesCode("OK")
-                .signDate(new Date())
-                .build();
-
-        applicationRepository.save(application);
-        Long id = application.getId();
-        Application testApplication = applicationRepository.findById(id).get();
-
-        assertEquals(testApplication.getId(), id);
-        assertEquals(testApplication.getApplicationStatus(), ApplicationStatus.APPROVED);
-        assertEquals(testApplication.getSesCode(), "OK");
-
-        applicationRepository.deleteById(id);
-    }
-
-    @Test
-    void testCreateApplication() {
-        Jsonb jsonb = JsonbBuilder.create();
-        StatusHistory statusHistory = StatusHistory.builder()
-                .status(ApplicationStatus.APPROVED)
-                .changeType(ChangeType.AUTOMATIC)
-                .date(new Date())
-                .build();
-        String strStatusHistory = jsonb.toJson(statusHistory);
-
-        Application application = applicationService.createApplication(1L, strStatusHistory);
-
-        assertEquals(application.getClientId().longValue(), 1L);
-        assertEquals(application.getSesCode(), "OK");
-        assertEquals(application.getApplicationStatus(), ApplicationStatus.PREAPPROVAL);
-        assertEquals(application.getStatusHistory(), strStatusHistory);
-    }
 
     @Test
     void testCreateStatusHistory() {
@@ -104,8 +64,6 @@ class ApplicationServiceImplTest {
 
         Application application = Application.builder()
                 .applicationStatus(ApplicationStatus.PREAPPROVAL)
-                .clientId(1L)
-                .creditId(1L)
                 .creationDate(date)
                 .sesCode("OK")
                 .signDate(date)

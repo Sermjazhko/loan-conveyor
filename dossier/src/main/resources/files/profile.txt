@@ -1,14 +1,10 @@
 Profile: 
 
-First Name: Liza
-Last Name: Serm
+First Name: First
+Last Name: Last
 Middle Name: null
 Email: seldead@mail.ru
-Birthdate: 2000-09-30
-Passport series: 2000
-Passport number: 200000
+Birthdate: 2000-05-05
+Passport: {"number": "200000", "series": "2000"}
 Loan offer: 
-Request amount: 100000
-Term: 12
-Rate: 15
-Monthly payment: 9025.83
+Request amount: {"rate": 15, "term": 12, "totalAmount": 100000, "applicationId": 1, "isSalaryClient": false, "monthlyPayment": 9025.83, "requestedAmount": 100000, "isInsuranceEnabled": false}

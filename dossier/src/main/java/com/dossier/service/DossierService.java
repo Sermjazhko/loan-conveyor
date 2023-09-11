@@ -2,6 +2,9 @@ package com.dossier.service;
 
 import com.dossier.dto.*;
 import com.dossier.integration.DealService;
+import com.dossier.model.Application;
+import com.dossier.model.Client;
+import com.dossier.model.Credit;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +24,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.List;
 
 @Slf4j
 @Component
@@ -55,7 +57,6 @@ public class DossierService {
 
         Long applicationId = emailMessage1.getApplicationId();
 
-        //ссылка для постмана (просто для навигации)
         String text = "Вы выбрали кредитное предложение, завершите регистрацию: " +
                 urlDeal + URL_DEAL_POST_CALCULATE + applicationId;
         sendSimpleMessage(emailMessage1.getAddress(), emailMessage1.getTheme().toString(), text);
@@ -77,15 +78,14 @@ public class DossierService {
 
         EmailMessage emailMessage1 = objectMapper.readValue(message, EmailMessage.class);
         Long applicationId = emailMessage1.getApplicationId();
-        LoanApplicationRequestDTO loanApplicationRequestDTO = getApplicationById(applicationId);
-        LoanOfferDTO loanOfferDTO = getOfferByApplicationId(applicationId);
-        CreditDTO creditDTO = getCreditByApplicationId(applicationId);
+        Application application = getApplicationById(applicationId);
+        Client client = getOfferByApplicationId(applicationId);
+        Credit credit = getCreditByApplicationId(applicationId);
 
-        createProfile(loanApplicationRequestDTO, loanOfferDTO);
-        createPaymentSchedule(creditDTO);
-        createLoanAgreement(loanApplicationRequestDTO, creditDTO);
+        createProfile(application,client);
+        createPaymentSchedule(credit);
+        createLoanAgreement(application,client,credit);
 
-        //ссылка для постмана (просто для навигации)
         String text = "Запрос на подписание документов: " + urlDeal + URL_DEAL_POST_DOCUMENT + applicationId + SIGN;
         sendMessageWithAttachment(emailMessage1.getAddress(), emailMessage1.getTheme().toString(), text);
     }
@@ -94,9 +94,8 @@ public class DossierService {
 
         EmailMessage emailMessage1 = objectMapper.readValue(message, EmailMessage.class);
         Long applicationId = emailMessage1.getApplicationId();
-
-        //ссылка для постмана (просто для навигации)
-        String text = "тут должна быть ПЭП. Запрос на подписание документов: " + urlDeal + URL_DEAL_POST_DOCUMENT + applicationId + CODE;
+        Application application = getApplicationById(applicationId);
+        String text = "ПЭП: " + application.getSesCode() + ". Запрос на подписание документов: " + urlDeal + URL_DEAL_POST_DOCUMENT + applicationId + CODE;
         sendSimpleMessage(emailMessage1.getAddress(), emailMessage1.getTheme().toString(), text);
     }
 
@@ -161,7 +160,7 @@ public class DossierService {
         }
     }
 
-    private void createProfile(LoanApplicationRequestDTO loanApplicationRequestDTO, LoanOfferDTO loanOfferDTO) {
+    private void createProfile(Application application, Client client) {
 
         Path path = Paths.get(PATH_FILES + PROFILE);
         try {
@@ -170,18 +169,15 @@ public class DossierService {
             }
             BufferedWriter bufferedWriter = Files.newBufferedWriter(path, StandardOpenOption.TRUNCATE_EXISTING);
             bufferedWriter.write("Profile: \n\n");
-            bufferedWriter.write("First Name: " + loanApplicationRequestDTO.getFirstName() + "\n");
-            bufferedWriter.write("Last Name: " + loanApplicationRequestDTO.getLastName() + "\n");
-            bufferedWriter.write("Middle Name: " + loanApplicationRequestDTO.getMiddleName() + "\n");
-            bufferedWriter.write("Email: " + loanApplicationRequestDTO.getEmail() + "\n");
-            bufferedWriter.write("Birthdate: " + loanApplicationRequestDTO.getBirthdate() + "\n");
-            bufferedWriter.write("Passport series: " + loanApplicationRequestDTO.getPassportSeries() + "\n");
-            bufferedWriter.write("Passport number: " + loanApplicationRequestDTO.getPassportNumber() + "\n");
+            bufferedWriter.write("First Name: " + client.getFirstName() + "\n");
+            bufferedWriter.write("Last Name: " + client.getLastName() + "\n");
+            bufferedWriter.write("Middle Name: " + client.getMiddleName() + "\n");
+            bufferedWriter.write("Email: " + client.getEmail() + "\n");
+            bufferedWriter.write("Birthdate: " + client.getBirthday() + "\n");
+            bufferedWriter.write("Passport: " + client.getPassport() + "\n");
+
             bufferedWriter.write("Loan offer: \n");
-            bufferedWriter.write("Request amount: " + loanOfferDTO.getRequestedAmount() + "\n");
-            bufferedWriter.write("Term: " + loanOfferDTO.getTerm() + "\n");
-            bufferedWriter.write("Rate: " + loanOfferDTO.getRate() + "\n");
-            bufferedWriter.write("Monthly payment: " + loanOfferDTO.getMonthlyPayment() + "\n");
+            bufferedWriter.write("Request amount: " + application.getAppliedOffer() + "\n");
             bufferedWriter.close();
             log.info("profile (file) created");
         } catch (Exception e) {
@@ -189,7 +185,7 @@ public class DossierService {
         }
     }
 
-    private void createPaymentSchedule(CreditDTO creditDTO) {
+    private void createPaymentSchedule(Credit credit) {
         Path path = Paths.get(PATH_FILES + PAYMENT_SCHEDULE);
         try {
             if (!Files.exists(path)) {
@@ -197,10 +193,8 @@ public class DossierService {
             }
             BufferedWriter bufferedWriter = Files.newBufferedWriter(path, StandardOpenOption.TRUNCATE_EXISTING);
             bufferedWriter.write("Payment schedule: \n\n");
-            List<PaymentScheduleElement> list = creditDTO.getPaymentSchedule();
-            for (int i = 0; i < list.size(); ++i) {
-                bufferedWriter.write(creditDTO.getPaymentSchedule().get(i) + "\n");
-            }
+
+            bufferedWriter.write(credit.getPaymentSchedule());
             bufferedWriter.close();
             log.info("payment schedule (file) created");
         } catch (Exception e) {
@@ -208,7 +202,7 @@ public class DossierService {
         }
     }
 
-    private void createLoanAgreement(LoanApplicationRequestDTO loanApplicationRequestDTO, CreditDTO creditDTO) {
+    private void createLoanAgreement(Application application, Client client, Credit credit) {
         Path path = Paths.get(PATH_FILES + LOAN_AGREEMENT);
         try {
             if (!Files.exists(path)) {
@@ -217,26 +211,17 @@ public class DossierService {
             BufferedWriter bufferedWriter = Files.newBufferedWriter(path, StandardOpenOption.TRUNCATE_EXISTING);
             bufferedWriter.write("Loan agreement: \n\n");
             bufferedWriter.write("Data: \n\n");
-            bufferedWriter.write("First Name: " + loanApplicationRequestDTO.getFirstName() + "\n");
-            bufferedWriter.write("Last Name: " + loanApplicationRequestDTO.getLastName() + "\n");
-            bufferedWriter.write("Middle Name: " + loanApplicationRequestDTO.getMiddleName() + "\n");
-            bufferedWriter.write("Email: " + loanApplicationRequestDTO.getEmail() + "\n");
-            bufferedWriter.write("Birthdate: " + loanApplicationRequestDTO.getBirthdate() + "\n");
-            bufferedWriter.write("Passport series: " + loanApplicationRequestDTO.getPassportSeries() + "\n");
-            bufferedWriter.write("Passport number: " + loanApplicationRequestDTO.getPassportNumber() + "\n");
+            bufferedWriter.write("First Name: " + client.getFirstName() + "\n");
+            bufferedWriter.write("Last Name: " + client.getLastName() + "\n");
+            bufferedWriter.write("Middle Name: " + client.getMiddleName() + "\n");
+            bufferedWriter.write("Email: " + client.getEmail() + "\n");
+            bufferedWriter.write("Birthdate: " + client.getBirthday() + "\n");
+            bufferedWriter.write("Passport: " + client.getPassport() + "\n");
+
             bufferedWriter.write("Loan details: \n");
-            bufferedWriter.write("Amount: " + creditDTO.getAmount() + "\n");
-            bufferedWriter.write("Term: " + creditDTO.getTerm() + "\n");
-            bufferedWriter.write("Rate: " + creditDTO.getRate() + "\n");
-            bufferedWriter.write("Monthly payment: " + creditDTO.getMonthlyPayment() + "\n");
-            bufferedWriter.write("PSK: " + creditDTO.getPsk() + "\n\n");
-
+            bufferedWriter.write("Request amount: " + application.getAppliedOffer() + "\n");
             bufferedWriter.write("Payment schedule: \n\n");
-
-            List<PaymentScheduleElement> list = creditDTO.getPaymentSchedule();
-            for (int i = 0; i < list.size(); ++i) {
-                bufferedWriter.write(creditDTO.getPaymentSchedule().get(i) + "\n");
-            }
+            bufferedWriter.write(credit.getPaymentSchedule());
             bufferedWriter.close();
             log.info("loan agreement (file) created");
         } catch (Exception e) {
@@ -244,16 +229,15 @@ public class DossierService {
         }
     }
 
-
-    private LoanApplicationRequestDTO getApplicationById(Long id) {
+    private Application getApplicationById(Long id) {
         return dealService.getApplicationById(id);
     }
 
-    private CreditDTO getCreditByApplicationId(Long id) {
-        return dealService.getCreditByApplicationId(id);
+    private Credit getCreditByApplicationId(Long id) {
+        return dealService.getApplicationById(id).getCredit();
     }
 
-    private LoanOfferDTO getOfferByApplicationId(Long id) {
-        return dealService.getOfferByApplicationId(id);
+    private Client getOfferByApplicationId(Long id) {
+        return dealService.getApplicationById(id).getClient();
     }
 }

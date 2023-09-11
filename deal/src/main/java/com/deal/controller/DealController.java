@@ -2,11 +2,9 @@ package com.deal.controller;
 
 import com.deal.dto.*;
 import com.deal.enums.ApplicationStatus;
-import com.deal.enums.ChangeType;
 import com.deal.model.Application;
 import com.deal.model.Client;
 import com.deal.model.Credit;
-import com.deal.model.StatusHistory;
 import com.deal.service.DealService;
 import com.deal.service.MessageService;
 import com.deal.service.application.ApplicationService;
@@ -27,7 +25,6 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -40,9 +37,6 @@ public class DealController {
 
     private static final String TOPIC_FINISH_REGISTRATION = "finish-registration";
     private static final String TOPIC_CREATE_DOCUMENT = "create-documents";
-    private static final String TOPIC_SEND_DOCUMENTS = "send-documents";
-    private static final String TOPIC_SEND_SES = "send-ses";
-    private static final String TOPIC_CREDIT_ISSUED = "credit-issued";
     private static final String TOPIC_APPLICATION_DENIED = "application-denied";
 
     private final ClientService clientService;
@@ -63,58 +57,54 @@ public class DealController {
                                                            @Parameter(description = "Заявка на получение кредита")
                                                            LoanApplicationRequestDTO loanApplicationRequestDTO) {
 
-        //На основе LoanApplicationRequestDTO создаётся сущность Client и сохраняется в БД.
-        log.info("Loan application request: " + loanApplicationRequestDTO);
+        try {
+            //Отправляется POST запрос на /conveyor/offers МС conveyor через FeignClient (здесь и далее вместо
+            // FeignClient можно использовать RestTemplate). Каждому элементу из списка List<LoanOfferDTO> присваивается id созданной заявки (Application)
+            String resourceUrl = "http://localhost:9090/conveyor/offers";
 
-        String resultPassport = clientService.createPassport(loanApplicationRequestDTO);
-        log.info("Result jsonb passport: " + resultPassport);
+            RestTemplate restTemplate = new RestTemplate();
 
-        Client client = clientService.createClient(loanApplicationRequestDTO, resultPassport);
-        log.info("Client: " + client);
+            log.info("Start POST request!");
 
-        clientService.addClientToDB(client);
-        log.info("Client add!");
+            HttpEntity<LoanApplicationRequestDTO> request =
+                    new HttpEntity<LoanApplicationRequestDTO>(loanApplicationRequestDTO);
 
-        //Создаётся Application со связью на только что созданный Client и сохраняется в БД.
-        List<StatusHistory> list = new ArrayList<>();
+            ResponseEntity<List<LoanOfferDTO>> rateResponse =
+                    restTemplate.exchange(resourceUrl,
+                            HttpMethod.POST, request, new ParameterizedTypeReference<List<LoanOfferDTO>>() {
+                            });
+            log.info("End POST request!");
 
-        String resultHistory = applicationService.createStatusHistory(list,
-                ApplicationStatus.PREPARE_DOCUMENTS, ChangeType.AUTOMATIC, new Date());
-        log.info("Result jsonb list history: " + resultHistory);
+            //На основе LoanApplicationRequestDTO создаётся сущность Client и сохраняется в БД.
+            log.info("Loan application request: " + loanApplicationRequestDTO);
 
-        Application application = applicationService.createApplication(client.getId(), resultHistory);
+            String resultPassport = clientService.createPassport(loanApplicationRequestDTO);
+            log.info("Result jsonb passport: " + resultPassport);
 
-        log.info("Application: " + application);
+            Client client = clientService.createClient(loanApplicationRequestDTO, resultPassport);
+            log.info("Client: " + client);
 
-        applicationService.addApplicationToDB(application);
-        log.info("Application add!");
+            clientService.addClientToDB(client);
+            log.info("Client add!");
 
-        //Отправляется POST запрос на /conveyor/offers МС conveyor через FeignClient (здесь и далее вместо
-        // FeignClient можно использовать RestTemplate). Каждому элементу из списка List<LoanOfferDTO> присваивается id созданной заявки (Application)
-        String resourceUrl = "http://localhost:9090/conveyor/offers";
+            Application application = applicationService.createApplication(client);
 
-        RestTemplate restTemplate = new RestTemplate();
+            log.info("Application: " + application);
+            applicationService.addApplicationToDB(application, new Date(), ApplicationStatus.PREAPPROVAL);
+            log.info("Application add!");
+            List<LoanOfferDTO> loanOfferDTOS = rateResponse.getBody();
 
-        log.info("Start POST request!");
+            for (int index = 0; index < 4; ++index) {
+                loanOfferDTOS.get(index).setApplicationId(application.getId());
+            }
 
-        HttpEntity<LoanApplicationRequestDTO> request =
-                new HttpEntity<LoanApplicationRequestDTO>(loanApplicationRequestDTO);
+            log.info("loanOffer: " + loanOfferDTOS);
 
-        ResponseEntity<List<LoanOfferDTO>> rateResponse =
-                restTemplate.exchange(resourceUrl,
-                        HttpMethod.POST, request, new ParameterizedTypeReference<List<LoanOfferDTO>>() {
-                        });
-        log.info("End POST request!");
 
-        List<LoanOfferDTO> loanOfferDTOS = rateResponse.getBody();
-
-        for (int index = 0; index < 4; ++index) {
-            loanOfferDTOS.get(index).setApplicationId(application.getId());
+            return new ResponseEntity<>(loanOfferDTOS, HttpStatus.CREATED);
+        } catch (Exception e) {
+            throw new IllegalArgumentException(e.getMessage());
         }
-
-        log.info("loanOffer: " + loanOfferDTOS);
-
-        return new ResponseEntity<>(loanOfferDTOS, HttpStatus.CREATED);
 
     }
 
@@ -126,7 +116,7 @@ public class DealController {
                     "The application is saved."
     )
     @PutMapping("/offer")
-    public void putOffer(@RequestBody LoanOfferDTO loanOfferDTO)  {
+    public void putOffer(@RequestBody LoanOfferDTO loanOfferDTO) {
 
         //По API приходит LoanOfferDTO
         // Достаётся из БД заявка(Application) по applicationId из LoanOfferDTO.
@@ -136,9 +126,6 @@ public class DealController {
         log.info("Id application: " + id + ". Application: " + application);
         //В заявке обновляется статус, история статусов(List<ApplicationStatusHistoryDTO>),
         // принятое предложение LoanOfferDTO устанавливается в поле appliedOffer.
-        Date date = new Date();
-        application = applicationService.updateApplicationStatusHistory(application, date,
-                ApplicationStatus.APPROVED);
 
         Jsonb jsonb = JsonbBuilder.create();
         String resultOffer = jsonb.toJson(loanOfferDTO);
@@ -146,11 +133,10 @@ public class DealController {
         log.info("New application: " + application);
 
         //Заявка сохраняется.
-        applicationService.addApplicationToDB(application);
+        applicationService.addApplicationToDB(application, new Date(), ApplicationStatus.APPROVED);
         log.info("Application update!");
 
-        Long clientId = application.getClientId();
-        Client client = clientService.getClientById(clientId);
+        Client client = application.getClient();
 
         messageService.sendMessage(ApplicationStatus.APPROVED, client.getEmail(), id, TOPIC_FINISH_REGISTRATION);
     }
@@ -175,7 +161,7 @@ public class DealController {
         log.info("Application: " + application);
 
         //ScoringDataDTO насыщается информацией из FinishRegistrationRequestDTO и Client, который хранится в Application
-        Client client = clientService.getClientById(application.getClientId());
+        Client client = application.getClient();
 
         Jsonb jsonb = JsonbBuilder.create();
         String strEmployment = jsonb.toJson(finishRegistrationRequestDTO.getEmployment());
@@ -192,14 +178,6 @@ public class DealController {
 
         //обновим историю статусов
         Date date = new Date();
-        application = applicationService.updateApplicationStatusHistory(application, date,
-                ApplicationStatus.CC_APPROVED);
-
-        log.info("Application: " + application);
-
-        applicationService.addApplicationToDB(application);
-        log.info("Application update!");
-
 
         ScoringDataDTO scoringDataDTO = creditService.createScoringData(finishRegistrationRequestDTO,
                 client, application);
@@ -219,91 +197,31 @@ public class DealController {
                             });
             log.info("End POST request. Credit dto: " + creditResponse);
 
-        Credit credit = creditService.createCredit(creditResponse.getBody());
-        log.info("Credit: " + credit);
+            Credit credit = creditService.createCredit(creditResponse.getBody());
+            log.info("Credit: " + credit);
 
-        creditService.addCreditToDB(credit);
-        log.info("Credit add!");
+            creditService.addCreditToDB(credit);
+            log.info("Credit add!");
 
-        application.setCreditId(credit.getId());
-        applicationService.addApplicationToDB(application);
+            application.setCredit(credit);
+            applicationService.addApplicationToDB(application, date, ApplicationStatus.CC_APPROVED);
+            log.info("Application update!");
 
-        messageService.sendMessage(ApplicationStatus.CC_APPROVED, client.getEmail(), applicationId, TOPIC_CREATE_DOCUMENT);
+            messageService.sendMessage(ApplicationStatus.CC_APPROVED, client.getEmail(), applicationId, TOPIC_CREATE_DOCUMENT);
         } catch (Exception e) {
+            applicationService.addApplicationToDB(application, date, ApplicationStatus.CC_DENIED);
             messageService.sendMessage(ApplicationStatus.CC_DENIED, client.getEmail(), applicationId, TOPIC_APPLICATION_DENIED);
-            throw  new IllegalArgumentException("Scoring failed");
+            throw new IllegalArgumentException("Scoring failed");
         }
     }
 
-    @Operation(
-            summary = "request to send documents",
-            description = "request to send documents + sending a message to the mail"
-    )
-    @PostMapping("/document/{applicationId}/send")
-    public void requestToSendDocuments(@PathVariable(value = "applicationId") Long applicationId) {
-        try {
-            dealService.sendMessage(applicationId, TOPIC_SEND_DOCUMENTS, ApplicationStatus.PREPARE_DOCUMENTS);
-        } catch (Exception e) {
-            log.error(e.getMessage());
-        }
-    }
-
-    @Operation(
-            summary = "request to sign documents",
-            description = "approval/client's refusal + request to sign documents. sending a message to the mail"
-    )
-    @PostMapping("/document/{applicationId}/sign")
-    public void requestToSignDocuments(@PathVariable(value = "applicationId") Long applicationId) {
-        try {
-            //тут какое-то условие, чтобы клиент отказался?
-            if(true) {
-                //какое-то формирование ПЭП???
-                dealService.sendMessage(applicationId, TOPIC_SEND_SES, ApplicationStatus.DOCUMENT_SIGNED);
-            } else {
-                dealService.sendMessage(applicationId, TOPIC_APPLICATION_DENIED, ApplicationStatus.CLIENT_DENIED);
-            }
-        } catch (Exception e) {
-            log.error(e.getMessage());
-        }
-    }
-
-    @Operation(
-            summary = "signing of documents",
-            description = "signing of documents + sending a message to the mail"
-    )
-    @PostMapping("/document/{applicationId}/code")
-    public void signingOfDocuments(@PathVariable(value = "applicationId") Long applicationId) {
-        try {
-            dealService.sendMessage(applicationId, TOPIC_CREDIT_ISSUED, ApplicationStatus.CREDIT_ISSUED);
-        } catch (Exception e) {
-            log.error(e.getMessage());
-        }
-    }
 
     @Operation(
             summary = "get applicationDTO",
             description = "getting information about the application by application id"
     )
     @GetMapping("/get/application/{applicationId}")
-    public ResponseEntity<LoanApplicationRequestDTO> getApplicationById(@PathVariable(value = "applicationId") Long applicationId) {
+    public ResponseEntity<Application> getApplicationById(@PathVariable(value = "applicationId") Long applicationId) {
         return dealService.getLoanApplicationByApplicationId(applicationId);
-    }
-
-    @Operation(
-            summary = "get creditDTO",
-            description = "getting information about the credit by application id"
-    )
-    @GetMapping("/get/credit/{applicationId}")
-    public ResponseEntity<CreditDTO> getCreditByApplicationId(@PathVariable(value = "applicationId") Long applicationId) {
-        return dealService.getCreditByApplicationId(applicationId);
-    }
-
-    @Operation(
-            summary = "get offedDTO",
-            description = "getting information about the offer by application id"
-    )
-    @GetMapping("/get/offer/{applicationId}")
-    public ResponseEntity<LoanOfferDTO> getOfferByApplicationId(@PathVariable(value = "applicationId") Long applicationId) {
-        return dealService.getOfferByApplicationId(applicationId);
     }
 }
