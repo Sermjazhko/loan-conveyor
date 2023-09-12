@@ -29,7 +29,6 @@ public class Credit implements Serializable {
     @Id
     @Column(name = "credit_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    // указывает, что свойство будет создаваться согласно указанной стратегии
     private Long id;
 
     @Column(name = "amount")

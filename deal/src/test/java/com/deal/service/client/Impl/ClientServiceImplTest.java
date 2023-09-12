@@ -6,17 +6,23 @@ import com.deal.model.Client;
 import com.deal.repository.ClientRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@SpringBootTest
+@RunWith(SpringRunner.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @ExtendWith(MockitoExtension.class)
+@TestPropertySource(
+        locations = "classpath:application-local.properties")
 class ClientServiceImplTest {
 
     @InjectMocks
@@ -33,6 +39,7 @@ class ClientServiceImplTest {
                 .lastName("dasd")
                 .birthday(LocalDate.of(2000, 1, 1))
                 .gender(Gender.MALE)
+                .email("seldead@m.ru")
                 .dependentAmount(2)
                 .passport("{\"number\": 2000}")
                 .account("0000S")
