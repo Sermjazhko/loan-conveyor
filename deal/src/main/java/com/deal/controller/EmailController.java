@@ -1,6 +1,7 @@
 package com.deal.controller;
 
 import com.deal.enums.ApplicationStatus;
+import com.deal.model.Application;
 import com.deal.service.DealService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -30,7 +31,7 @@ public class EmailController {
     @PostMapping("/{applicationId}/send")
     public void requestToSendDocuments(@PathVariable(value = "applicationId") Long applicationId) {
         try {
-            dealService.updateApplication(applicationId, TOPIC_SEND_DOCUMENTS, ApplicationStatus.PREPARE_DOCUMENTS);
+            dealService.updateApplication(dealService.getApplicationById(applicationId), TOPIC_SEND_DOCUMENTS, ApplicationStatus.PREPARE_DOCUMENTS);
         } catch (Exception e) {
             log.error(e.getMessage());
         }
@@ -43,7 +44,9 @@ public class EmailController {
     @PostMapping("/{applicationId}/sign")
     public void requestToSignDocuments(@PathVariable(value = "applicationId") Long applicationId) {
         try {
-            dealService.updateApplication(applicationId, TOPIC_SEND_SES, ApplicationStatus.DOCUMENT_SIGNED);
+            Application application = dealService.getApplicationById(applicationId);
+            application = dealService.setSesCode(application);
+            dealService.updateApplication(application, TOPIC_SEND_SES, ApplicationStatus.DOCUMENT_SIGNED);
         } catch (Exception e) {
             log.error(e.getMessage());
         }
@@ -57,9 +60,11 @@ public class EmailController {
     public void signingOfDocuments(@PathVariable(value = "applicationId") Long applicationId, @RequestParam String ses) {
         try {
             if (dealService.checkSesCode(ses, applicationId)) {
-                dealService.updateApplication(applicationId, TOPIC_CREDIT_ISSUED, ApplicationStatus.CREDIT_ISSUED);
+                Application application = dealService.getApplicationById(applicationId);
+                application = dealService.setSignDate(application);
+                dealService.updateApplication(application, TOPIC_CREDIT_ISSUED, ApplicationStatus.CREDIT_ISSUED);
             } else {
-                dealService.updateApplication(applicationId, TOPIC_APPLICATION_DENIED, ApplicationStatus.CLIENT_DENIED);
+                dealService.updateApplication(dealService.getApplicationById(applicationId), TOPIC_APPLICATION_DENIED, ApplicationStatus.CLIENT_DENIED);
                 log.error("Incorrect ses code");
             }
         } catch (Exception e) {

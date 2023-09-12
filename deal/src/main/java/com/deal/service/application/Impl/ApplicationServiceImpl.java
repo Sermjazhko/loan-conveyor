@@ -15,7 +15,6 @@ import javax.json.bind.JsonbBuilder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Random;
 
 @Slf4j
 @Service
@@ -46,17 +45,13 @@ public class ApplicationServiceImpl implements ApplicationService {
         return Application.builder()
                 .client(client)
                 .creationDate(date)
-                .sesCode(generationSesCode())
+                .sesCode("-")
                 .signDate(date)
                 .applicationStatus(ApplicationStatus.PREAPPROVAL)
                 .statusHistory(jsonb.toJson(list))
                 .build();
     }
 
-    private String generationSesCode() {
-        Random random = new Random();
-        return String.format("%04d", random.nextInt(10000));
-    }
 
     @Override
     public String createStatusHistory(List list, ApplicationStatus applicationStatus, ChangeType changeType,

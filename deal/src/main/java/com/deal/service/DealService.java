@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.Random;
 
 @Slf4j
 @Service
@@ -32,11 +33,19 @@ public class DealService {
         messageService.sendMessage(applicationStatus, client.getEmail(), applicationId, topicName);
     }
 
-    public void updateApplication(Long applicationId, String topicName, ApplicationStatus applicationStatus) {
-        log.info("status: " + applicationStatus + ", id: " + applicationId + ", topic: " + topicName);
-        Application application = applicationService.getApplicationById(applicationId);
+    private String generationSesCode() {
+        Random random = new Random();
+        return String.format("%04d", random.nextInt(10000));
+    }
+
+    public Application getApplicationById(Long applicationId) {
+        return applicationService.getApplicationById(applicationId);
+    }
+
+    public void updateApplication(Application application, String topicName, ApplicationStatus applicationStatus) {
+        log.info("status: " + applicationStatus + ", application: " + application + ", topic: " + topicName);
         applicationService.addApplicationToDB(application, new Date(), applicationStatus);
-        sendMessage(applicationId, topicName, applicationStatus);
+        sendMessage(application.getId(), topicName, applicationStatus);
         log.info("application: " + application);
     }
 
@@ -45,5 +54,15 @@ public class DealService {
         String applicationSes = application.getSesCode();
         log.info("ses: " + ses + ", correct ses: " + applicationSes);
         return ses.equals(applicationSes);
+    }
+
+    public Application setSesCode(Application application) {
+        application.setSesCode(generationSesCode());
+        return application;
+    }
+
+    public Application setSignDate(Application application) {
+        application.setSignDate(new Date());
+        return application;
     }
 }
