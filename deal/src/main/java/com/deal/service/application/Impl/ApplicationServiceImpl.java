@@ -1,24 +1,24 @@
 package com.deal.service.application.Impl;
 
-import com.deal.controller.DealController;
 import com.deal.enums.ApplicationStatus;
 import com.deal.enums.ChangeType;
 import com.deal.model.Application;
+import com.deal.model.Client;
 import com.deal.model.StatusHistory;
 import com.deal.repository.ApplicationRepository;
 import com.deal.service.application.ApplicationService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Logger;
 
+@Slf4j
 @Service
 public class ApplicationServiceImpl implements ApplicationService {
-
-    private static Logger log = Logger.getLogger(DealController.class.getName());
 
     private final ApplicationRepository applicationRepository;
 
@@ -27,8 +27,9 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
-    public void addApplicationToDB(Application application) {
-        applicationRepository.save(application);
+    public void addApplicationToDB(Application application, Date date, ApplicationStatus applicationStatus) {
+        Application application1 = updateApplicationStatusHistory(application, date, applicationStatus);
+        applicationRepository.save(application1);
     }
 
     @Override
@@ -37,15 +38,22 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
-    public Application createApplication(Long id, String statusHistory) {
+    public List<Application> getApplications() {
+        return applicationRepository.findAll();
+    }
+
+    @Override
+    public Application createApplication(Client client) {
         Date date = new Date();
+        Jsonb jsonb = JsonbBuilder.create();
+        List<StatusHistory> list = new ArrayList<>();
         return Application.builder()
-                .clientId(id)
+                .client(client)
                 .creationDate(date)
-                .sesCode("OK")
+                .sesCode("-")
                 .signDate(date)
                 .applicationStatus(ApplicationStatus.PREAPPROVAL)
-                .statusHistory(statusHistory)
+                .statusHistory(jsonb.toJson(list))
                 .build();
     }
 

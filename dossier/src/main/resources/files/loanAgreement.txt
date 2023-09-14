@@ -1,0 +1,15 @@
+Loan agreement: 
+
+Data: 
+
+First Name: First
+Last Name: Last
+Middle Name: null
+Email: Razzhivina.a.a@yandex.ru
+Birthdate: 2000-05-05
+Passport: {"number": "200000", "series": "2000"}
+Loan details: 
+Request amount: {"rate": 12, "term": 12, "totalAmount": 115000, "applicationId": 14, "isSalaryClient": false, "monthlyPayment": 10217.61, "requestedAmount": 15000, "isInsuranceEnabled": true}
+Payment schedule: 
+
+[{"date": "2023-09-14", "number": 0, "debtPayment": 0.00, "totalPayment": 10056.92, "remainingDebt": 115000.00, "interestPayment": 0.00}, {"date": "2023-10-14", "number": 1, "debtPayment": 9194.42, "totalPayment": 10056.92, "remainingDebt": 105805.58, "interestPayment": 862.50}, {"date": "2023-11-14", "number": 2, "debtPayment": 9263.38, "totalPayment": 10056.92, "remainingDebt": 96542.20, "interestPayment": 793.54}, {"date": "2023-12-14", "number": 3, "debtPayment": 9332.85, "totalPayment": 10056.92, "remainingDebt": 87209.35, "interestPayment": 724.07}, {"date": "2024-01-14", "number": 4, "debtPayment": 9402.85, "totalPayment": 10056.92, "remainingDebt": 77806.50, "interestPayment": 654.07}, {"date": "2024-02-14", "number": 5, "debtPayment": 9473.37, "totalPayment": 10056.92, "remainingDebt": 68333.13, "interestPayment": 583.55}, {"date": "2024-03-14", "number": 6, "debtPayment": 9544.42, "totalPayment": 10056.92, "remainingDebt": 58788.71, "interestPayment": 512.50}, {"date": "2024-04-14", "number": 7, "debtPayment": 9616.00, "totalPayment": 10056.92, "remainingDebt": 49172.70, "interestPayment": 440.92}, {"date": "2024-05-14", "number": 8, "debtPayment": 9688.12, "totalPayment": 10056.92, "remainingDebt": 39484.58, "interestPayment": 368.80}, {"date": "2024-06-14", "number": 9, "debtPayment": 9760.79, "totalPayment": 10056.92, "remainingDebt": 29723.79, "interestPayment": 296.13}, {"date": "2024-07-14", "number": 10, "debtPayment": 9833.99, "totalPayment": 10056.92, "remainingDebt": 19889.80, "interestPayment": 222.93}, {"date": "2024-08-14", "number": 11, "debtPayment": 9907.75, "totalPayment": 10056.92, "remainingDebt": 9982.05, "interestPayment": 149.17}, {"date": "2024-09-14", "number": 12, "debtPayment": 9982.05, "totalPayment": 10056.92, "remainingDebt": 0.00, "interestPayment": 74.87}]

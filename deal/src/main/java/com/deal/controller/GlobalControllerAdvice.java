@@ -32,9 +32,17 @@ public class GlobalControllerAdvice {
                 .body(errors);
     }
 
+    @ExceptionHandler(IllegalAccessException.class)
+    public ResponseEntity<ErrorMessage> handleAllException(IllegalAccessException exception) {
+        log.error(exception.getMessage());
+        return ResponseEntity
+                .status(BAD_REQUEST)
+                .body(new ErrorMessage(exception.getMessage()));
+    }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorMessage> handleAllException(Exception exception) {
+        log.error(exception.getMessage());
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ErrorMessage(exception.getMessage()));

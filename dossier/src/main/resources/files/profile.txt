@@ -1,0 +1,10 @@
+Profile: 
+
+First Name: First
+Last Name: Last
+Middle Name: null
+Email: Razzhivina.a.a@yandex.ru
+Birthdate: 2000-05-05
+Passport: {"number": "200000", "series": "2000"}
+Loan offer: 
+Request amount: {"rate": 12, "term": 12, "totalAmount": 115000, "applicationId": 14, "isSalaryClient": false, "monthlyPayment": 10217.61, "requestedAmount": 15000, "isInsuranceEnabled": true}

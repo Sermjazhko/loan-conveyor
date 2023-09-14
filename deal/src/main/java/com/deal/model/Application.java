@@ -29,14 +29,15 @@ public class Application implements Serializable {
     @Id
     @Column(name = "application_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    // указывает, что свойство будет создаваться согласно указанной стратегии
     private Long id;
 
-    @Column(name = "client_id")
-    private Long clientId;
+    @OneToOne
+    @JoinColumn(name = "client_id", referencedColumnName = "client_id")
+    private Client client;
 
-    @Column(name = "credit_id")
-    private Long creditId;
+    @OneToOne
+    @JoinColumn(name = "credit_id", referencedColumnName = "credit_id")
+    private Credit credit;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
