@@ -24,7 +24,7 @@ public class ApplicationController {
             summary = "Сalculation of possible loan terms.",
             description = "Data prescoring and application creation."
     )
-    @PostMapping("/application/application")
+    @PostMapping("/application")
     public List<LoanOfferDTO> createApplication(@RequestBody @Parameter(description = "Application for a loan")
                                                 LoanApplicationRequestDTO loanApplicationRequestDTO) {
 
@@ -39,7 +39,7 @@ public class ApplicationController {
             summary = "Choosing one of the offers",
             description = "Updating the application statuses and accepting the offer"
     )
-    @PutMapping("/application/offer")
+    @PostMapping ("/application/apply")
     public void applyOffer(@RequestBody @Parameter(description = "loan offer") LoanOfferDTO loanOfferDTO) {
         log.info("Input data to the calculation, loan offer DTO: " + loanOfferDTO);
         applicationService.applyOffer(loanOfferDTO);

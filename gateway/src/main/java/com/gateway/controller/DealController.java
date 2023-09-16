@@ -20,13 +20,9 @@ public class DealController {
 
     @Operation(
             summary = "Completion of registration + full credit calculation.",
-            description = "The application is retrieved from the database by applicationId." +
-                    "The ScoringDataDTO is saturated with information from the FinishRegistrationRequestDTO " +
-                    "and the Client, which is stored in the Application" +
-                    "A POST request is sent to the MC CC with the body of the ScoringDataDTO." +
-                    "The loan body is created and added to the database."
+            description = "The application is retrieved from the database by applicationId."
     )
-    @PutMapping("/deal/calculate/{applicationId}")
+    @PostMapping ("/application/registration/{applicationId}")
     public void calculationLoanParameters(@RequestBody FinishRegistrationRequestDTO finishRegistrationRequestDTO,
                                           @PathVariable(value = "applicationId") Long applicationId) {
         log.info("Input data to the calculation, FinishRegistrationRequestDTO: " + finishRegistrationRequestDTO +
@@ -38,7 +34,7 @@ public class DealController {
             summary = "request to send documents",
             description = "request to send documents + sending a message to the mail"
     )
-    @PostMapping("/deal/document/{applicationId}/send")
+    @PostMapping("/document/{applicationId}")
     public void requestToSendDocuments(@PathVariable(value = "applicationId") Long applicationId) {
 
         log.info("Input data, applicationId: " + applicationId);
@@ -49,7 +45,7 @@ public class DealController {
             summary = "request to sign documents",
             description = "approval/client's refusal + request to sign documents. sending a message to the mail"
     )
-    @PostMapping("/deal/document/{applicationId}/sign")
+    @PostMapping("/document/{applicationId}/sign")
     public void requestToSignDocuments(@PathVariable(value = "applicationId") Long applicationId) {
 
         log.info("Input data, applicationId: " + applicationId);
@@ -60,11 +56,10 @@ public class DealController {
             summary = "signing of documents",
             description = "signing of documents + sending a message to the mail"
     )
-    @PostMapping("/deal/document/{applicationId}/code")
+    @PostMapping("/document/{applicationId}/sign/code")
     public void requestToSendDocuments(@PathVariable(value = "applicationId") Long applicationId, @RequestParam String ses) {
 
         log.info("Input data, applicationId: " + applicationId + ", ses: " + ses);
         dealService.signingOfDocuments(ses, applicationId);
     }
-
 }

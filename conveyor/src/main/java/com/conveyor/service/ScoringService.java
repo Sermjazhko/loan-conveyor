@@ -126,7 +126,7 @@ public class ScoringService {
         FileInputStream file;
         Properties properties = new Properties();
         try {
-            file = new FileInputStream("src/main/resources/config.properties");
+            file = new FileInputStream("conveyor/src/main/resources/config.properties");
             properties.load(file);
             BigDecimal baseRate = new BigDecimal(properties.getProperty("base.rate"));
             BigDecimal insurance = new BigDecimal(properties.getProperty("insurance"));
@@ -229,11 +229,8 @@ public class ScoringService {
                     BigDecimal.valueOf(interestPayment).setScale(2, RoundingMode.HALF_UP),
                     BigDecimal.valueOf(debtPayment).setScale(2, RoundingMode.HALF_UP),
                     BigDecimal.valueOf(remainingDebt).setScale(2, RoundingMode.HALF_UP)));
-            //изменяем инфу
             interestPayment = remainingDebt * (0.01 * rateDoub / 12);
             date = date.plusMonths(1);
-            //interestPayment = 0.01 * remainingDebt * rateDoub * date.lengthOfMonth() / date.lengthOfYear();
-            //interestPayment = 0.01 * remainingDebt;
             debtPayment = monthlyPaymentDoub - interestPayment;
             remainingDebt = remainingDebt - debtPayment;
         }

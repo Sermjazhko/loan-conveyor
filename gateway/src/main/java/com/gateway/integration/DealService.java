@@ -1,6 +1,7 @@
 package com.gateway.integration;
 
 import com.gateway.dto.FinishRegistrationRequestDTO;
+import com.gateway.model.Application;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,6 +17,8 @@ import java.util.*;
 public class DealService {
     private static final String URL_DEAL = "/deal";
     private static final String URL_DOCUMENT = "/document";
+
+    private static final String URL_DEAL_GET_APPLICATION = "/deal/admin/application";
 
     @Value("${integration.deal.url}")
     private String urlDeal;
@@ -59,5 +62,21 @@ public class DealService {
         log.info("signing of documents");
     }
 
+    public Application getApplicationById(Long applicationId) {
+        log.info("URL: " + urlDeal + URL_DEAL_GET_APPLICATION + "/" + applicationId);
 
+        Application application = restTemplate.getForObject(urlDeal + URL_DEAL_GET_APPLICATION + "/" + applicationId, Application.class);
+
+        log.info("application: " + application);
+        return application;
+    }
+
+    public List<Application> getApplications() {
+        log.info("URL: " + urlDeal + URL_DEAL_GET_APPLICATION );
+
+        List<Application> applications = restTemplate.getForObject(urlDeal + URL_DEAL_GET_APPLICATION, List.class);
+
+        log.info("List application: " + applications);
+        return applications;
+    }
 }

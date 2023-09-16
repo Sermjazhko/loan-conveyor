@@ -9,7 +9,7 @@
 Ниже приведены примеры запросов:
 
 
-http://localhost:9085/application/application
+http://localhost:9085/application
 
 
 {
@@ -32,7 +32,7 @@ http://localhost:9085/application/application
 
 }
 
-http://localhost:9085/application/offer
+http://localhost:9085/application/apply
 
 {
 
@@ -53,7 +53,7 @@ http://localhost:9085/application/offer
 "isSalaryClient": false
 
 }
-http://localhost:9085/deal/calculate/{applicationId}
+http://localhost:9085/application/registration/{applicationId}
 
 {
 
@@ -87,9 +87,9 @@ http://localhost:9085/deal/calculate/{applicationId}
 
 }
 
-http://localhost:9085/deal/document/{applicationId}/send
+http://localhost:9085/document/{applicationId}
 
-http://localhost:9085/deal/document/{applicationId}/sign
+http://localhost:9085/document/{applicationId}/sign
 
-http://localhost:9085/deal/document/{applicationId}/code?ses=0000
+http://localhost:9085/document/{applicationId}/sign/code?ses=0000
 

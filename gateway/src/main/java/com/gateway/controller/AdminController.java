@@ -1,24 +1,19 @@
-package com.deal.controller;
+package com.gateway.controller;
 
-
-import com.deal.model.Application;
-import com.deal.service.DealService;
+import com.gateway.integration.DealService;
+import com.gateway.model.Application;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @Slf4j
 @Tag(name = "Admin controller", description = "getting information about the application")
 @RestController
-@RequestMapping("/deal/admin")
+@RequestMapping("/admin")
 @RequiredArgsConstructor
 public class AdminController {
 
@@ -29,8 +24,8 @@ public class AdminController {
             description = "getting information about the application by application id"
     )
     @GetMapping("/application/{applicationId}")
-    public ResponseEntity<Application> getApplicationById(@PathVariable(value = "applicationId") Long applicationId) {
-        return dealService.getLoanApplicationByApplicationId(applicationId);
+    public Application getApplicationById(@PathVariable(value = "applicationId") Long applicationId) {
+        return dealService.getApplicationById(applicationId);
     }
 
     @Operation(
@@ -38,7 +33,7 @@ public class AdminController {
             description = "getting information about the applications"
     )
     @GetMapping("/application")
-    public ResponseEntity<List<Application>> getApplication() {
+    public List<Application> getApplication() {
         return dealService.getApplications();
     }
 }

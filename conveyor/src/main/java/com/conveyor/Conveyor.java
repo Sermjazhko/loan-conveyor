@@ -6,9 +6,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import java.io.IOException;
 
 @SpringBootApplication
-public class SpringBootStarter {
+public class Conveyor {
 
     public static void main(String[] args) throws IOException {
-        SpringApplication.run(SpringBootStarter.class, args);
+        SpringApplication.run(Conveyor.class, args);
     }
 }
