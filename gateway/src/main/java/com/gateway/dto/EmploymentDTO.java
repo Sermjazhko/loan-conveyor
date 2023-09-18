@@ -17,12 +17,16 @@ import java.math.BigDecimal;
 @Schema(description = "Employee Information")
 public class EmploymentDTO {
 
-    @Schema(description = "Employee status: self-employed/unemployed/business")
+    @Schema(description = "Employee status", example = "UNEMPLOYED")
     private EmploymentStatus employmentStatus;
+    @Schema(description = "employer INN", example = "1234567")
     private String employerINN;
+    @Schema(description = "Salary", example = "40000.0")
     private BigDecimal salary;
-    @Schema(description = "Position in the company: manager, middle manager, top manager")
+    @Schema(description = "Position in the company", example = "WORKER")
     private Position position;
+    @Schema(description = "Work Experience Total", example = "12")
     private Integer workExperienceTotal;
+    @Schema(description = "Work Experience Current", example = "12")
     private Integer workExperienceCurrent;
 }
