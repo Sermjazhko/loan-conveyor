@@ -22,7 +22,7 @@ import static java.lang.Math.pow;
 public class ScoringService {
     private static Logger log = Logger.getLogger(ScoringService.class.getName());
 
-    public BigDecimal getEmploymentStatus(EmploymentStatus employmentStatus) {
+    public BigDecimal getEmploymentStatus(EmploymentStatus employmentStatus)  throws IllegalArgumentException {
 
         BigDecimal rate;
 
@@ -40,7 +40,7 @@ public class ScoringService {
         return rate;
     }
 
-    public BigDecimal getPosition(Position position) {
+    public BigDecimal getPosition(Position position)  throws IllegalArgumentException {
 
         BigDecimal rate;
 
@@ -62,7 +62,7 @@ public class ScoringService {
         return rate;
     }
 
-    public BigDecimal getMaritalStatus(MaritalStatus maritalStatus) {
+    public BigDecimal getMaritalStatus(MaritalStatus maritalStatus)  throws IllegalArgumentException{
 
         BigDecimal rate;
 
@@ -94,7 +94,7 @@ public class ScoringService {
         return rate;
     }
 
-    public BigDecimal getGender(Gender gender, LocalDate localDate) {
+    public BigDecimal getGender(Gender gender, LocalDate localDate)  throws IllegalArgumentException {
 
         LocalDate localDateNow = LocalDate.now();
         long years = localDate.until(localDateNow, ChronoUnit.YEARS);
@@ -238,7 +238,7 @@ public class ScoringService {
         return paymentScheduleElements;
     }
 
-    public boolean checkScoringDataDTO(ScoringDataDTO scoringDataDTO, BigDecimal insurance) {
+    public boolean checkScoringDataDTO(ScoringDataDTO scoringDataDTO, BigDecimal insurance)  throws IllegalArgumentException{
         //если страховки нет, передаем 0
         if (scoringDataDTO.getEmployment().getEmploymentStatus() == EmploymentStatus.UNEMPLOYED) {
             throw new IllegalArgumentException("Unsuitable candidate, Employment Status");

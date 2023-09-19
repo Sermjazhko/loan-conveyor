@@ -13,11 +13,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-@Tag(name="Conveyor controller", description="Implements the business logic of the credit pipeline")
+@Tag(name = "Conveyor controller", description = "Implements the business logic of the credit pipeline")
 @RestController
 @RequestMapping("/conveyor")
 public class ConveyorController {
@@ -38,8 +39,8 @@ public class ConveyorController {
     )
     @PostMapping("/offers")
     public ResponseEntity<List<LoanOfferDTO>> getPostOffer(@RequestBody
-                                                               @Parameter(description = "Заявка на получение кредита")
-                                                               LoanApplicationRequestDTO loanApplicationRequestDTO) {
+                                                           @Parameter(description = "Заявка на получение кредита")
+                                                           LoanApplicationRequestDTO loanApplicationRequestDTO) {
         try {
             log.info("Input data to the offer, Loan Application Request: " + loanApplicationRequestDTO);
 
@@ -53,7 +54,7 @@ public class ConveyorController {
         } catch (Exception e) {
             log.log(Level.SEVERE, "Exception: ", e);
 
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new IllegalArgumentException("Prescoring falied");
         }
     }
 
@@ -66,8 +67,8 @@ public class ConveyorController {
     )
     @PostMapping("/calculation")
     public ResponseEntity<CreditDTO> getPostCalculation(@RequestBody
-                                                            @Parameter(description = "Данные пользователя")
-                                                            ScoringDataDTO scoringDataDTO) {
+                                                        @Parameter(description = "Данные пользователя")
+                                                        ScoringDataDTO scoringDataDTO) throws IOException {
 
         try {
             log.info("Input data to the calculation, Scoring Data: " + scoringDataDTO);
@@ -77,10 +78,9 @@ public class ConveyorController {
 
             log.info("Output data to the calculation, Credit: " + creditDTO);
             return new ResponseEntity<>(creditDTO, HttpStatus.CREATED);
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
             log.log(Level.SEVERE, "Exception: ", e);
-
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new IllegalArgumentException("Scoring falied");
         }
     }
 }
