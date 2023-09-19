@@ -38,6 +38,11 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
+    public List<Application> getApplications() {
+        return applicationRepository.findAll();
+    }
+
+    @Override
     public Application createApplication(Client client) {
         Date date = new Date();
         Jsonb jsonb = JsonbBuilder.create();

@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Random;
 
 @Slf4j
@@ -40,6 +41,10 @@ public class DealService {
 
     public Application getApplicationById(Long applicationId) {
         return applicationService.getApplicationById(applicationId);
+    }
+
+    public ResponseEntity<List<Application>> getApplications() {
+        return new ResponseEntity<>(applicationService.getApplications(), HttpStatus.OK);
     }
 
     public void updateApplication(Application application, String topicName, ApplicationStatus applicationStatus) {

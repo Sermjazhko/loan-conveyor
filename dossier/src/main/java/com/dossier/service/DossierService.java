@@ -29,15 +29,12 @@ import java.nio.file.StandardOpenOption;
 @Component
 @RequiredArgsConstructor
 public class DossierService {
-    private static final String PATH_FILES = "src\\main\\resources\\files\\";
+    private static final String PATH_FILES = "dossier\\src\\main\\resources\\files\\";
     private static final String PROFILE = "profile.txt";
     private static final String PAYMENT_SCHEDULE = "paymentSchedule.txt";
     private static final String LOAN_AGREEMENT = "loanAgreement.txt";
-    private static final String URL_DEAL_POST_DOCUMENT = "/deal/document/";
-    private static final String URL_DEAL_POST_CALCULATE = "/deal/calculate/";
     private static final String CODE = "/code";
     private static final String SIGN = "/sign";
-    private static final String SEND = "/send";
 
     @Value("${integration.deal.url}")
     private String urlDeal;
@@ -58,7 +55,7 @@ public class DossierService {
         Long applicationId = emailMessage1.getApplicationId();
 
         String text = "Вы выбрали кредитное предложение, завершите регистрацию: " +
-                urlDeal + URL_DEAL_POST_CALCULATE + applicationId;
+                "http://localhost:9085/application/registration/" + applicationId;
         sendSimpleMessage(emailMessage1.getAddress(), emailMessage1.getTheme().toString(), text);
         log.info("");
     }
@@ -69,7 +66,7 @@ public class DossierService {
         Long applicationId = emailMessage1.getApplicationId();
         //ссылка для постмана (просто для навигации)
         String text = "Отправьте запрос на создание документов: " +
-                urlDeal + URL_DEAL_POST_DOCUMENT + applicationId + SEND;
+                "http://localhost:9085/document/" + applicationId;
         sendSimpleMessage(emailMessage1.getAddress(), emailMessage1.getTheme().toString(), text);
 
     }
@@ -82,11 +79,11 @@ public class DossierService {
         Client client = getOfferByApplicationId(applicationId);
         Credit credit = getCreditByApplicationId(applicationId);
 
-        createProfile(application,client);
+        createProfile(application, client);
         createPaymentSchedule(credit);
-        createLoanAgreement(application,client,credit);
+        createLoanAgreement(application, client, credit);
 
-        String text = "Запрос на подписание документов: " + urlDeal + URL_DEAL_POST_DOCUMENT + applicationId + SIGN;
+        String text = "Запрос на подписание документов: " + "http://localhost:9085/document/" + applicationId + SIGN;
         sendMessageWithAttachment(emailMessage1.getAddress(), emailMessage1.getTheme().toString(), text);
     }
 
@@ -95,7 +92,8 @@ public class DossierService {
         EmailMessage emailMessage1 = objectMapper.readValue(message, EmailMessage.class);
         Long applicationId = emailMessage1.getApplicationId();
         Application application = getApplicationById(applicationId);
-        String text = "ПЭП: " + application.getSesCode() + ". Запрос на подписание документов: " + urlDeal + URL_DEAL_POST_DOCUMENT + applicationId + CODE;
+        String text = "ПЭП: " + application.getSesCode() + ". Запрос на подписание документов: " +
+                "http://localhost:9085/document/" + applicationId + SIGN + CODE;
         sendSimpleMessage(emailMessage1.getAddress(), emailMessage1.getTheme().toString(), text);
     }
 

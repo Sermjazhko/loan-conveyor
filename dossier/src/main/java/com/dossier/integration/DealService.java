@@ -14,7 +14,7 @@ import org.springframework.web.client.RestTemplate;
 @Service
 @RequiredArgsConstructor
 public class DealService {
-    private static final String URL_DEAL_GET_APPLICATION = "/deal/get/application/";
+    private static final String URL_DEAL_GET_APPLICATION = "/deal/admin/application/";
 
     @Value("${integration.deal.url}")
     private String urlDeal;

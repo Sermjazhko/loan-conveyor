@@ -1,10 +1,10 @@
 Profile: 
 
-First Name: Good
-Last Name: Job
+First Name: First
+Last Name: Last
 Middle Name: null
 Email: seldead@mail.ru
 Birthdate: 2000-05-05
 Passport: {"number": "200000", "series": "2000"}
 Loan offer: 
-Request amount: {"rate": 11, "term": 12, "totalAmount": 200000, "applicationId": 11, "isSalaryClient": true, "monthlyPayment": 17676.33, "requestedAmount": 100000, "isInsuranceEnabled": true}
+Request amount: {"rate": 14, "term": 12, "totalAmount": 100000, "applicationId": 15, "isSalaryClient": true, "monthlyPayment": 8978.71, "requestedAmount": 100000, "isInsuranceEnabled": false}

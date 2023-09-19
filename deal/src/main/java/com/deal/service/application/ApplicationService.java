@@ -14,6 +14,8 @@ public interface ApplicationService {
 
     Application getApplicationById(Long id);
 
+    List<Application> getApplications();
+
     Application createApplication(Client client);
 
     String createStatusHistory(List list, ApplicationStatus applicationStatus, ChangeType changeType,

@@ -43,7 +43,6 @@ public class DealController {
     private final ApplicationService applicationService;
     private final CreditService creditService;
     private final MessageService messageService;
-    private final DealService dealService;
 
     @Operation(
             summary = "Calculation of possible loan terms",
@@ -213,15 +212,5 @@ public class DealController {
             messageService.sendMessage(ApplicationStatus.CC_DENIED, client.getEmail(), applicationId, TOPIC_APPLICATION_DENIED);
             throw new IllegalArgumentException("Scoring failed");
         }
-    }
-
-
-    @Operation(
-            summary = "get applicationDTO",
-            description = "getting information about the application by application id"
-    )
-    @GetMapping("/get/application/{applicationId}")
-    public ResponseEntity<Application> getApplicationById(@PathVariable(value = "applicationId") Long applicationId) {
-        return dealService.getLoanApplicationByApplicationId(applicationId);
     }
 }
