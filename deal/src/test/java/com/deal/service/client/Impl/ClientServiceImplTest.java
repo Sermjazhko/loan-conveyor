@@ -4,6 +4,7 @@ import com.deal.dto.LoanApplicationRequestDTO;
 import com.deal.enums.Gender;
 import com.deal.model.Client;
 import com.deal.repository.ClientRepository;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;

@@ -9,6 +9,7 @@ import com.deal.model.Client;
 import com.deal.model.Credit;
 import com.deal.model.Passport;
 import com.deal.repository.CreditRepository;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;

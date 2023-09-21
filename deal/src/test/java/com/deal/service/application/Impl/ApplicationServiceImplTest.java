@@ -4,6 +4,7 @@ import com.deal.enums.ApplicationStatus;
 import com.deal.enums.ChangeType;
 import com.deal.model.Application;
 import com.deal.model.StatusHistory;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
