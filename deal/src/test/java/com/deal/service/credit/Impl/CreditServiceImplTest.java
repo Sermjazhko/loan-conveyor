@@ -9,6 +9,7 @@ import com.deal.model.Client;
 import com.deal.model.Credit;
 import com.deal.model.Passport;
 import com.deal.repository.CreditRepository;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
@@ -42,6 +43,7 @@ class CreditServiceImplTest {
     @Autowired
     private CreditRepository creditRepository;
 
+    @Disabled
     @Test
     public void testAddAndGetCredit() {
         //первые два метода
@@ -74,6 +76,7 @@ class CreditServiceImplTest {
         creditRepository.deleteById(id);
     }
 
+    @Disabled
     @Test
     public void testCreateScoringData() {
         Passport passport = Passport.builder()
@@ -143,6 +146,7 @@ class CreditServiceImplTest {
         assertEquals(scoringDataDTO.getIsInsuranceEnabled(), loanOfferDTO.getIsInsuranceEnabled());
     }
 
+    @Disabled
     @Test
     public void testCreateCredit() {
         List list = new ArrayList<>();

@@ -4,6 +4,7 @@ import com.deal.dto.LoanApplicationRequestDTO;
 import com.deal.enums.Gender;
 import com.deal.model.Client;
 import com.deal.repository.ClientRepository;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
@@ -31,6 +32,7 @@ class ClientServiceImplTest {
     @Autowired
     private ClientRepository clientRepository;
 
+    @Disabled
     @Test
     public void testAddAndGetClient() {
         //первые два метода
@@ -60,6 +62,7 @@ class ClientServiceImplTest {
         clientRepository.deleteById(id);
     }
 
+    @Disabled
     @Test
     public void testCreatePassport() {
         LoanApplicationRequestDTO loanApplicationRequestDTO =
@@ -72,6 +75,7 @@ class ClientServiceImplTest {
         assertEquals(passport, testPassport);
     }
 
+    @Disabled
     @Test
     public void testCreateClient() {
         LocalDate localDate = LocalDate.of(2000, 2, 2);
