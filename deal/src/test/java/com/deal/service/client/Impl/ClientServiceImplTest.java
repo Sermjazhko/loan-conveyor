@@ -32,7 +32,6 @@ class ClientServiceImplTest {
     @Autowired
     private ClientRepository clientRepository;
 
-    @Disabled
     @Test
     public void testAddAndGetClient() {
         //первые два метода
@@ -62,7 +61,6 @@ class ClientServiceImplTest {
         clientRepository.deleteById(id);
     }
 
-    @Disabled
     @Test
     public void testCreatePassport() {
         LoanApplicationRequestDTO loanApplicationRequestDTO =
@@ -75,7 +73,6 @@ class ClientServiceImplTest {
         assertEquals(passport, testPassport);
     }
 
-    @Disabled
     @Test
     public void testCreateClient() {
         LocalDate localDate = LocalDate.of(2000, 2, 2);

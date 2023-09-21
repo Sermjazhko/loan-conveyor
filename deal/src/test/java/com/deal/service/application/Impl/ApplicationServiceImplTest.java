@@ -32,7 +32,6 @@ class ApplicationServiceImplTest {
     @InjectMocks
     private ApplicationServiceImpl applicationService;
 
-    @Disabled
     @Test
     void testCreateStatusHistory() {
         Date date = new Date();
@@ -49,7 +48,6 @@ class ApplicationServiceImplTest {
         assertEquals(statusTest, realStatus);
     }
 
-    @Disabled
     @Test
     void testUpdateStatusHistory() {
         Date date = new Date();

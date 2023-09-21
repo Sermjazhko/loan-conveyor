@@ -43,7 +43,6 @@ class CreditServiceImplTest {
     @Autowired
     private CreditRepository creditRepository;
 
-    @Disabled
     @Test
     public void testAddAndGetCredit() {
         //первые два метода
@@ -76,7 +75,6 @@ class CreditServiceImplTest {
         creditRepository.deleteById(id);
     }
 
-    @Disabled
     @Test
     public void testCreateScoringData() {
         Passport passport = Passport.builder()
@@ -146,7 +144,6 @@ class CreditServiceImplTest {
         assertEquals(scoringDataDTO.getIsInsuranceEnabled(), loanOfferDTO.getIsInsuranceEnabled());
     }
 
-    @Disabled
     @Test
     public void testCreateCredit() {
         List list = new ArrayList<>();
