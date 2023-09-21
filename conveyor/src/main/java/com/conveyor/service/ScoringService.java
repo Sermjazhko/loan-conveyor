@@ -123,7 +123,6 @@ public class ScoringService {
 
     public List<BigDecimal> getBaseRateAndInsurance() throws IOException {
         //0 - base rate, 1 - insurance
-        log.info("CURRENT FILE PATH: " +  System.getProperty("user.dir"));
         FileInputStream file;
         Properties properties = new Properties();
         try {
