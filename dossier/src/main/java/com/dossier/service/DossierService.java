@@ -29,7 +29,7 @@ import java.nio.file.StandardOpenOption;
 @Component
 @RequiredArgsConstructor
 public class DossierService {
-    private static final String PATH_FILES = "dossier\\src\\main\\resources\\files\\";
+    private static final String PATH_FILES = "\\dossier\\src\\main\\resources\\files\\";
     private static final String PROFILE = "profile.txt";
     private static final String PAYMENT_SCHEDULE = "paymentSchedule.txt";
     private static final String LOAN_AGREEMENT = "loanAgreement.txt";

@@ -1,0 +1,86 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:13.3
+    environment:
+      POSTGRES_DB: "postgres"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+    ports:
+      - "5432:5432"
+
+  conveyor:
+    container_name: conveyor
+    build: ./conveyor
+    ports:
+      - 9090:9090
+
+  deal:
+    container_name: deal
+    build: ./deal
+    ports:
+      - 9080:9080
+    environment:
+      WEBHOST: conveyor
+      WEBHOST_KAFKA: kafka
+      SPRING_APPLICATION_JSON: '{
+            "spring.datasource.url" : "jdbc:postgresql://postgres:5432/postgres",
+            "spring.datasource.username" : "postgres",
+            "spring.datasource.password" : "postgres"
+          }'
+    depends_on:
+      - postgres
+      - kafka
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - 22181:2181
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - zookeeper
+    ports:
+      - 29092:29092
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://kafka:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  application:
+    container_name: application
+    build: ./application
+    ports:
+      - 9070:9070
+    environment:
+      WEBHOST_DEAL: deal
+
+  dossier:
+    container_name: dossier
+    build: ./dossier
+    ports:
+      - 9030:9030
+    environment:
+      WEBHOST_DEAL: deal
+      WEBHOST_KAFKA: kafka
+      USERNAME: sermiazhko.e.a@gmail.com
+      PASSWORD: ftiillyxodnmazge
+    depends_on:
+      - kafka
+
+  gateway:
+    container_name: gateway
+    build: ./gateway
+    ports:
+      - 9085:9085
+    environment:
+      WEBHOST_DEAL: deal
+      WEBHOST_APPLICATION: application

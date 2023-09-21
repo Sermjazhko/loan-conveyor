@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -39,6 +40,9 @@ public class DealController {
     private static final String TOPIC_CREATE_DOCUMENT = "create-documents";
     private static final String TOPIC_APPLICATION_DENIED = "application-denied";
 
+    @Value("${integration.conveyor.url}")
+    private String urlConveyor;
+
     private final ClientService clientService;
     private final ApplicationService applicationService;
     private final CreditService creditService;
@@ -59,8 +63,9 @@ public class DealController {
         try {
             //Отправляется POST запрос на /conveyor/offers МС conveyor через FeignClient (здесь и далее вместо
             // FeignClient можно использовать RestTemplate). Каждому элементу из списка List<LoanOfferDTO> присваивается id созданной заявки (Application)
-            String resourceUrl = "http://localhost:9090/conveyor/offers";
+            String resourceUrl = urlConveyor+"/conveyor/offers";
 
+            log.info("url: " + resourceUrl);
             RestTemplate restTemplate = new RestTemplate();
 
             log.info("Start POST request!");
@@ -183,7 +188,7 @@ public class DealController {
         log.info("Scoring data: " + scoringDataDTO);
 
         try {
-            String resourceUrl = "http://localhost:9090/conveyor/calculation";
+            String resourceUrl = urlConveyor + "/conveyor/calculation";
 
             //Отправляется POST запрос к МС КК с телом ScoringDataDTO
             RestTemplate restTemplate = new RestTemplate();
