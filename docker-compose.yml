@@ -85,8 +85,8 @@ services:
     environment:
       WEBHOST_DEAL: deal
       WEBHOST_KAFKA: kafka
-      USERNAME: sermiazhko.e.a@gmail.com
-      PASSWORD: ftiillyxodnmazge
+      USERNAME: username
+      PASSWORD: password
     depends_on:
       - kafka
 
