@@ -9,16 +9,24 @@ services:
       POSTGRES_PASSWORD: "postgres"
     ports:
       - "5432:5432"
+    healthcheck:
+      test: "exit 0"
 
   conveyor:
     container_name: conveyor
-    build: ./conveyor
+    image: conveyor
+    build:
+      context: ./conveyor
+      dockerfile: Dockerfile
     ports:
       - 9090:9090
 
   deal:
     container_name: deal
-    build: ./deal
+    image: deal
+    build:
+      context: ./deal
+      dockerfile: Dockerfile
     ports:
       - 9080:9080
     environment:
@@ -57,7 +65,10 @@ services:
 
   application:
     container_name: application
-    build: ./application
+    image: application
+    build:
+      context: ./application
+      dockerfile: Dockerfile
     ports:
       - 9070:9070
     environment:
@@ -65,20 +76,26 @@ services:
 
   dossier:
     container_name: dossier
-    build: ./dossier
+    image: dossier
+    build:
+      context: ./dossier
+      dockerfile: Dockerfile
     ports:
       - 9030:9030
     environment:
       WEBHOST_DEAL: deal
       WEBHOST_KAFKA: kafka
-      USERNAME: username
-      PASSWORD: password
+      USERNAME: sermiazhko.e.a@gmail.com
+      PASSWORD: ftiillyxodnmazge
     depends_on:
       - kafka
 
   gateway:
     container_name: gateway
-    build: ./gateway
+    image: gateway
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
     ports:
       - 9085:9085
     environment:
