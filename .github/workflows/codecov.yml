@@ -21,19 +21,19 @@ jobs:
           cache: maven
 
       - name: Build MS-application with Maven
-        run: mvn -B clean package --file ./application/pom.xml
+        run: mvn -B clean package --file ./application/pom.xml -e
 
       - name: Build MS-conveyor with Maven
-        run: mvn -B clean package --file ./conveyor/pom.xml
+        run: mvn -B clean package --file ./conveyor/pom.xml -e
 
       - name: Build MS-deal with Maven
-        run: mvn -B clean package --file ./deal/pom.xml
+        run: mvn -B clean package --file ./deal/pom.xml -e
 
       - name: Build MS-dossier with Maven
-        run: mvn -B clean package --file ./dossier/pom.xml
+        run: mvn -B clean package --file ./dossier/pom.xml -e
 
       - name: Build MS-gateway with Maven
-        run: mvn -B clean package --file ./gateway/pom.xml
+        run: mvn -B clean package --file ./gateway/pom.xml -e
 
       - name: Test Coverage Application
         uses: codecov/codecov-action@v3
