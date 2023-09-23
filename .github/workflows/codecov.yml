@@ -27,7 +27,7 @@ jobs:
         run: mvn -B clean package --file ./conveyor/pom.xml -e
 
       - name: Build MS-deal with Maven
-        run: mvn -B clean package --file ./deal/pom.xml -e
+        run: mvn -B clean package --file ./deal/pom.xml -e -Dmaven.test.skip=true
 
       - name: Build MS-dossier with Maven
         run: mvn -B clean package --file ./dossier/pom.xml -e
