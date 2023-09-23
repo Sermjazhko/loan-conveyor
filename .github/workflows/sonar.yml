@@ -15,11 +15,11 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - name: Set up JDK 17
+      - name: Set up JDK 11
         uses: actions/setup-java@v3
         with:
-          java-version: 17
-          distribution: 'zulu'
+          java-version: 11
+          distribution: 'temurin'
 
       - name: Analyze Application with SonarCloud
         working-directory: ./application
@@ -30,7 +30,7 @@ jobs:
 
       - name: Analyze Conveyor with SonarCloud
         working-directory: ./conveyor
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=Sermjazhko_loan-conveyor -f pom.xml
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=Sermjazhko_loan-conveyor -f pom.xml -e
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
